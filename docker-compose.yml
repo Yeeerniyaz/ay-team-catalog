@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ay-team-catalog:
+    container_name: ay-team-prod
+    # Portainer скачает гит, найдет Dockerfile и соберет легкий образ Nginx
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4515:80"
+    restart: always
+    # Ограничиваем аппетит контейнера для твоего сервера
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+        reservations:
+          memory: 64M
+    networks:
+      - ay_team_network
+
+networks:
+  ay_team_network:
+    driver: bridge
