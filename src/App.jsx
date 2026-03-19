@@ -49,7 +49,14 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;900&display=swap');
 
-        /* ЖЕСТКИЙ СБРОС: Убиваем все линии по бокам */
+        /* УБИВАЕМ СТАНДАРТНЫЕ ОТСТУПЫ VITE И БРАУЗЕРА */
+        #root {
+          max-width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          text-align: left !important;
+        }
+
         html, body {
           margin: 0 !important;
           padding: 0 !important;
@@ -62,6 +69,7 @@ export default function App() {
           -ms-overflow-style: none; 
           scrollbar-width: none;    
         }
+        
         * {
           box-sizing: border-box;
         }
@@ -101,6 +109,11 @@ export default function App() {
         .btn-hover { transition: all 0.3s ease; }
         .btn-hover:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(27,46,61,0.15); }
         
+        /* Стили для новых интерактивных плашек в футере */
+        .footer-pill { transition: all 0.3s ease; text-decoration: none; display: block; }
+        .footer-pill:hover .pill-bg { background-color: rgba(255,255,255,0.1) !important; transform: scale(1.02); }
+        .footer-pill:hover .pill-icon { transform: translateX(5px); color: white !important; }
+
         .nav-link { transition: color 0.3s ease; text-decoration: none; }
         .nav-link:hover { color: #888 !important; }
       `}</style>
@@ -124,7 +137,7 @@ export default function App() {
         {/* ========================================== */}
         {/* HERO СЕКЦИЯ */}
         {/* ========================================== */}
-        <Box pt={20} pb={{ base: 60, md: 100 }} bg="#FFFFFF" pos="relative" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
+        <Box pt={40} pb={{ base: 60, md: 100 }} bg="#FFFFFF" pos="relative" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
           <Container size="xl" pos="relative" style={{ zIndex: 20, flexGrow: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
             
             <Center mb={{ base: 40, md: 60 }}>
@@ -202,7 +215,7 @@ export default function App() {
         </Box>
 
         {/* ========================================== */}
-        {/* КАТАЛОГ */}
+        {/* КАТАЛОГ (Фото строго одного размера - квадрат) */}
         {/* ========================================== */}
         <Box id="catalog" py={{ base: 60, md: 100 }} bg="#FFFFFF" w="100%">
           <Container size="xl" w="100%">
@@ -227,12 +240,14 @@ export default function App() {
                     onClick={() => setSelectedItem(item)}
                     style={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
                   >
+                    {/* Контейнер для фото со строгим 1:1 соотношением */}
                     <Box 
                       bg="white" 
                       radius="30px" 
                       p="xl"
                       style={{ 
-                        aspectRatio: '4/4',
+                        aspectRatio: '1 / 1', /* Жесткий квадрат */
+                        width: '100%',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -241,9 +256,10 @@ export default function App() {
                     >
                       <Image
                         src={`/images/${item.main}`}
-                        fit="contain"
-                        alt={item.name}
+                        fit="contain" /* Картинка всегда аккуратно вписана */
+                        w="100%"
                         h="100%"
+                        alt={item.name}
                         style={{ filter: 'drop-shadow(0px 15px 30px rgba(27,46,61,0.08))' }}
                       />
                     </Box>
@@ -266,7 +282,7 @@ export default function App() {
         </Box>
 
         {/* ========================================== */}
-        {/* ПОДВАЛ (На всю ширину, прямой верхний край) */}
+        {/* ПОДВАЛ (С новыми премиальными плашками) */}
         {/* ========================================== */}
         <Box bg="#1B2E3D" pt={{ base: 60, md: 100 }} pb={40} w="100%" style={{ position: 'relative', zIndex: 10 }}>
           <Container size="xl" w="100%">
@@ -280,48 +296,74 @@ export default function App() {
 
             <Grid gutter={{ base: 30, md: 40 }}>
               
-              {/* Блок Контактов - Строго по центру */}
+              {/* Блок Контактов - Интерактивные плашки Apple-style */}
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Paper p={{ base: 30, md: 50 }} radius="40px" bg="rgba(255,255,255,0.03)" withBorder={false} style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <Text size="xs" tt="uppercase" ls={2} c="rgba(255,255,255,0.4)" fw={800} mb="xl" ta="center">Отдел продаж</Text>
                   
-                  <Stack gap="xl" align="center">
-                    <Group align="center" justify="center">
-                      <ActionIcon size={40} radius="100%" bg="rgba(255,255,255,0.1)" c="white" component="a" href="https://wa.me/77052727304" target="_blank">
-                        <Icons.WhatsApp />
-                      </ActionIcon>
-                      <Box ta="center">
-                        <Text size="10px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700}>Айдос</Text>
-                        <Anchor href="https://wa.me/77052727304" target="_blank" c="white" fw={800} size="lg" className="nav-link">+7 705 272 7304</Anchor>
-                      </Box>
-                    </Group>
+                  <Stack gap="md" w="100%" maw={320}>
                     
-                    <Group align="center" justify="center">
-                      <ActionIcon size={40} radius="100%" bg="rgba(255,255,255,0.1)" c="white" component="a" href="https://wa.me/77476509747" target="_blank">
-                        <Icons.WhatsApp />
-                      </ActionIcon>
-                      <Box ta="center">
-                        <Text size="10px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700}>Темирлан</Text>
-                        <Anchor href="https://wa.me/77476509747" target="_blank" c="white" fw={800} size="lg" className="nav-link">+7 747 650 9747</Anchor>
-                      </Box>
-                    </Group>
+                    {/* Плашка Айдос */}
+                    <UnstyledButton component="a" href="https://wa.me/77052727304" target="_blank" className="footer-pill">
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                        <Group wrap="nowrap" justify="space-between">
+                          <Group wrap="nowrap" gap="sm">
+                            <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
+                              <Icons.WhatsApp />
+                            </Center>
+                            <Box ta="left">
+                              <Text size="9px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700} lh={1}>Айдос</Text>
+                              <Text c="white" fw={800} size="sm" lh={1.2}>+7 705 272 7304</Text>
+                            </Box>
+                          </Group>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                        </Group>
+                      </Paper>
+                    </UnstyledButton>
 
-                    <Group align="center" justify="center">
-                      <ActionIcon size={40} radius="100%" bg="rgba(255,255,255,0.1)" c="white" component="a" href="https://instagram.com/ayteam_mebel" target="_blank">
-                        <Icons.Instagram />
-                      </ActionIcon>
-                      <Box ta="center">
-                        <Text size="10px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700}>Соцсети</Text>
-                        <Anchor href="https://instagram.com/ayteam_mebel" target="_blank" c="white" fw={800} size="lg" className="nav-link">@ayteam_mebel</Anchor>
-                      </Box>
-                    </Group>
+                    {/* Плашка Темирлан */}
+                    <UnstyledButton component="a" href="https://wa.me/77476509747" target="_blank" className="footer-pill">
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                        <Group wrap="nowrap" justify="space-between">
+                          <Group wrap="nowrap" gap="sm">
+                            <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
+                              <Icons.WhatsApp />
+                            </Center>
+                            <Box ta="left">
+                              <Text size="9px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700} lh={1}>Темирлан</Text>
+                              <Text c="white" fw={800} size="sm" lh={1.2}>+7 747 650 9747</Text>
+                            </Box>
+                          </Group>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                        </Group>
+                      </Paper>
+                    </UnstyledButton>
+
+                    {/* Плашка Инстаграм */}
+                    <UnstyledButton component="a" href="https://instagram.com/ayteam_mebel" target="_blank" className="footer-pill">
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                        <Group wrap="nowrap" justify="space-between">
+                          <Group wrap="nowrap" gap="sm">
+                            <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
+                              <Icons.Instagram />
+                            </Center>
+                            <Box ta="left">
+                              <Text size="9px" tt="uppercase" ls={1} c="rgba(255,255,255,0.5)" fw={700} lh={1}>Соцсети</Text>
+                              <Text c="white" fw={800} size="sm" lh={1.2}>@ayteam_mebel</Text>
+                            </Box>
+                          </Group>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                        </Group>
+                      </Paper>
+                    </UnstyledButton>
+
                   </Stack>
                 </Paper>
               </Grid.Col>
 
               {/* Блок Yerniyaz - Строго по центру */}
               <Grid.Col span={{ base: 12, md: 6 }}>
-                <Paper p={{ base: 30, md: 50 }} radius="40px" bg="rgba(255,255,255,0.03)" withBorder={false} style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+                <Paper p={{ base: 40, md: 50 }} radius="40px" bg="rgba(255,255,255,0.03)" withBorder={false} style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
                   
                   <Badge variant="filled" bg="rgba(255,255,255,0.1)" c="white" radius="xl" size="sm" mb="md">IT / WEB</Badge>
                   <Text size="xs" tt="uppercase" ls={2} c="rgba(255,255,255,0.4)" fw={800} mb="xs">Digital Production</Text>
@@ -387,7 +429,7 @@ export default function App() {
                 <Icons.X />
               </ActionIcon>
 
-              {/* Сайдбар - скрыт на мобилках */}
+              {/* Сайдбар - Строгий размер фото */}
               <Paper 
                 display={{ base: 'none', lg: 'flex' }}
                 flexDirection="column"
@@ -411,8 +453,9 @@ export default function App() {
                           style={{ transition: 'all 0.2s ease' }}
                         >
                           <Flex align="center" gap="md">
-                            <Box w={40} h={40} p={4} bg="white" radius="8px" style={{ boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                              <Image src={`/images/${item.main}`} fit="contain" h="100%" />
+                            {/* Строгий размер фото в списке бокового меню */}
+                            <Box w={50} h={50} p={6} bg="white" radius="10px" style={{ flexShrink: 0, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                              <Image src={`/images/${item.main}`} fit="contain" w="100%" h="100%" />
                             </Box>
                             <Text fw={isActive ? 800 : 600} size="sm" c={isActive ? '#1B2E3D' : 'rgba(27,46,61,0.6)'} tt="uppercase">
                               {item.name}
