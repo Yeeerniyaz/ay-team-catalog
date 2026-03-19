@@ -34,10 +34,86 @@ export default function App() {
   const [zoomedImage, setZoomedImage] = useState(null);
   const [isZoomScale, setIsZoomScale] = useState(false);
 
-  useEffect(() => {
-    if (embla && selectedItem) {
-      embla.scrollTo(0, true);
+  // ==========================================
+  // ГЕНЕРАЦИЯ META-ТЕГОВ (ДЛЯ ПРЕВЬЮ В WHATSAPP/TELEGRAM)
+  // ==========================================
+  const updateMetaTags = (item) => {
+    if (item) {
+      document.title = `${item.name} | AY TEAM`;
+      
+      let ogTitle = document.querySelector('meta[property="og:title"]');
+      if (!ogTitle) { ogTitle = document.createElement('meta'); ogTitle.setAttribute('property', 'og:title'); document.head.appendChild(ogTitle); }
+      ogTitle.setAttribute('content', `${item.name} | AY TEAM`);
+
+      let ogImage = document.querySelector('meta[property="og:image"]');
+      if (!ogImage) { ogImage = document.createElement('meta'); ogImage.setAttribute('property', 'og:image'); document.head.appendChild(ogImage); }
+      ogImage.setAttribute('content', `${window.location.origin}/images/${item.main}`);
+    } else {
+      document.title = `AY TEAM | Архитектура вашего пространства`;
     }
+  };
+
+  // ==========================================
+  // SMART ROUTING ДЛЯ ССЫЛОК И КНОПКИ "НАЗАД"
+  // ==========================================
+  useEffect(() => {
+    // Проверяем URL при первой загрузке (если кто-то перешел по ссылке ?item=1)
+    const params = new URLSearchParams(window.location.search);
+    const itemId = params.get('item');
+    if (itemId) {
+      const item = catalogData.find(i => String(i.id) === itemId);
+      if (item) {
+        setSelectedItem(item);
+        updateMetaTags(item);
+      }
+    }
+
+    // Слушатель кнопки "Назад" в браузере и на телефоне
+    const handlePopState = () => {
+      const currentParams = new URLSearchParams(window.location.search);
+      const currentItemId = currentParams.get('item');
+      if (currentItemId) {
+        const item = catalogData.find(i => String(i.id) === currentItemId);
+        setSelectedItem(item || null);
+        updateMetaTags(item);
+      } else {
+        setSelectedItem(null);
+        updateMetaTags(null);
+      }
+      setZoomedImage(null);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const openItem = (item) => {
+    setSelectedItem(item);
+    window.history.pushState({}, '', `?item=${item.id}`);
+    updateMetaTags(item);
+  };
+
+  const closeItem = () => {
+    setSelectedItem(null);
+    window.history.pushState({}, '', window.location.pathname);
+    updateMetaTags(null);
+  };
+
+  const openZoom = (img) => {
+    setZoomedImage(img);
+    // Добавляем запись в историю, чтобы при нажатии "Назад" закрылся только зум
+    window.history.pushState({ zoom: true }, '', window.location.search);
+  };
+
+  const closeZoom = (e) => {
+    if (e) e.stopPropagation();
+    setZoomedImage(null);
+    if (window.history.state?.zoom) {
+      window.history.back();
+    }
+  };
+
+  useEffect(() => {
+    if (embla && selectedItem) embla.scrollTo(0, true);
   }, [embla, selectedItem]);
 
   useEffect(() => {
@@ -49,7 +125,6 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700;900&display=swap');
 
-        /* УБИВАЕМ СТАНДАРТНЫЕ ОТСТУПЫ VITE И БРАУЗЕРА */
         #root {
           max-width: 100% !important;
           padding: 0 !important;
@@ -70,24 +145,15 @@ export default function App() {
           scrollbar-width: none;    
         }
         
-        * {
-          box-sizing: border-box;
-        }
-
-        ::-webkit-scrollbar { 
-          display: none; 
-          width: 0px; 
-          background: transparent; 
-        }
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { display: none; width: 0px; background: transparent; }
 
         .fade-up {
           animation: fadeUpAnim 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           opacity: 0;
           transform: translateY(30px);
         }
-        @keyframes fadeUpAnim {
-          to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes fadeUpAnim { to { opacity: 1; transform: translateY(0); } }
 
         .hover-card {
           transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
@@ -100,27 +166,35 @@ export default function App() {
           box-shadow: 0 20px 40px rgba(27, 46, 61, 0.08) !important;
         }
 
-        .image-zoom {
-          transition: transform 0.5s ease;
-          cursor: zoom-in;
-        }
+        .image-zoom { transition: transform 0.5s ease; cursor: zoom-in; }
         .image-zoom:hover { transform: scale(1.03); }
-
         .btn-hover { transition: all 0.3s ease; }
         .btn-hover:hover { opacity: 0.9; transform: translateY(-2px); box-shadow: 0 10px 20px rgba(27,46,61,0.15); }
         
-        /* Стили для новых интерактивных плашек в футере */
         .footer-pill { transition: all 0.3s ease; text-decoration: none; display: block; }
         .footer-pill:hover .pill-bg { background-color: rgba(255,255,255,0.1) !important; transform: scale(1.02); }
         .footer-pill:hover .pill-icon { transform: translateX(5px); color: white !important; }
-
         .nav-link { transition: color 0.3s ease; text-decoration: none; }
         .nav-link:hover { color: #888 !important; }
+
+        /* ========================================== */
+        /* УБИРАЕМ ОТСТУПЫ У КАРТИНОК НА СМАРТФОНАХ  */
+        /* ========================================== */
+        .custom-carousel .mantine-Carousel-slide {
+          padding: 10px !important; /* Минимум отступов на телефоне */
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        @media (min-width: 992px) {
+          .custom-carousel .mantine-Carousel-slide {
+            padding: 40px !important; /* Красивые отступы только на ПК */
+          }
+        }
       `}</style>
 
       <Box style={{ minHeight: '100vh', overflowX: 'hidden', width: '100%' }}>
         
-        {/* КНОПКА НАВЕРХ */}
         <Affix position={{ bottom: rem(20), right: rem(20) }} zIndex={100}>
           <Transition transition="slide-up" mounted={scroll.y > 400}>
             {(transitionStyles) => (
@@ -134,12 +208,9 @@ export default function App() {
           </Transition>
         </Affix>
 
-        {/* ========================================== */}
         {/* HERO СЕКЦИЯ */}
-        {/* ========================================== */}
         <Box pt={40} pb={{ base: 60, md: 100 }} bg="#FFFFFF" pos="relative" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', width: '100%' }}>
           <Container size="xl" pos="relative" style={{ zIndex: 20, flexGrow: 1, display: 'flex', flexDirection: 'column', width: '100%' }}>
-            
             <Center mb={{ base: 40, md: 60 }}>
               <Group gap="sm" style={{ cursor: "pointer" }} onClick={() => scrollTo({ y: 0 })}>
                 <Center bg="#1B2E3D" w={48} h={48} style={{ borderRadius: "100%" }}>
@@ -168,12 +239,7 @@ export default function App() {
               </Text>
 
               <Flex justify="center" align="center" gap={{ base: 'sm', md: 'md' }} mt={40} wrap="wrap">
-                <Paper 
-                  component="a" href="https://wa.me/77052727304" target="_blank"
-                  radius="100px" p="6px 20px 6px 6px" bg="#F8F9FA" 
-                  withBorder={false}
-                  style={{ border: '1px solid rgba(27,46,61,0.05)', textDecoration: 'none' }} className="btn-hover"
-                >
+                <Paper component="a" href="https://wa.me/77052727304" target="_blank" radius="100px" p="6px 20px 6px 6px" bg="#F8F9FA" withBorder={false} style={{ border: '1px solid rgba(27,46,61,0.05)', textDecoration: 'none' }} className="btn-hover">
                   <Group gap="sm">
                     <Center w={38} h={38} bg="#1B2E3D" style={{ borderRadius: '50%' }} c="white">
                       <Icons.WhatsApp />
@@ -185,12 +251,7 @@ export default function App() {
                   </Group>
                 </Paper>
 
-                <Paper 
-                  component="a" href="https://wa.me/77476509747" target="_blank"
-                  radius="100px" p="6px 20px 6px 6px" bg="#F8F9FA" 
-                  withBorder={false}
-                  style={{ border: '1px solid rgba(27,46,61,0.05)', textDecoration: 'none' }} className="btn-hover"
-                >
+                <Paper component="a" href="https://wa.me/77476509747" target="_blank" radius="100px" p="6px 20px 6px 6px" bg="#F8F9FA" withBorder={false} style={{ border: '1px solid rgba(27,46,61,0.05)', textDecoration: 'none' }} className="btn-hover">
                   <Group gap="sm">
                     <Center w={38} h={38} bg="#1B2E3D" style={{ borderRadius: '50%' }} c="white">
                       <Icons.WhatsApp />
@@ -214,9 +275,7 @@ export default function App() {
           </Container>
         </Box>
 
-        {/* ========================================== */}
-        {/* КАТАЛОГ (Фото строго одного размера - квадрат) */}
-        {/* ========================================== */}
+        {/* КАТАЛОГ */}
         <Box id="catalog" py={{ base: 60, md: 100 }} bg="#FFFFFF" w="100%">
           <Container size="xl" w="100%">
             <Center style={{ flexDirection: 'column', textAlign: 'center' }} mb={{ base: 40, md: 60 }} className="fade-up">
@@ -231,37 +290,9 @@ export default function App() {
             <Grid gutter={{ base: "xl", md: 40 }}>
               {catalogData.map((item) => (
                 <Grid.Col span={{ base: 12, sm: 6, lg: 4 }} key={item.id}>
-                  <Card 
-                    p="lg" 
-                    radius="40px" 
-                    bg="#F8F9FA"
-                    className="hover-card"
-                    withBorder={false}
-                    onClick={() => setSelectedItem(item)}
-                    style={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}
-                  >
-                    {/* Контейнер для фото со строгим 1:1 соотношением */}
-                    <Box 
-                      bg="white" 
-                      radius="30px" 
-                      p="xl"
-                      style={{ 
-                        aspectRatio: '1 / 1', /* Жесткий квадрат */
-                        width: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 5px 15px rgba(27,46,61,0.02)'
-                      }}
-                    >
-                      <Image
-                        src={`/images/${item.main}`}
-                        fit="contain" /* Картинка всегда аккуратно вписана */
-                        w="100%"
-                        h="100%"
-                        alt={item.name}
-                        style={{ filter: 'drop-shadow(0px 15px 30px rgba(27,46,61,0.08))' }}
-                      />
+                  <Card p="lg" radius="40px" bg="#F8F9FA" className="hover-card" withBorder={false} onClick={() => openItem(item)} style={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <Box bg="white" radius="30px" p="xl" style={{ aspectRatio: '1 / 1', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 5px 15px rgba(27,46,61,0.02)' }}>
+                      <Image src={`/images/${item.main}`} fit="contain" w="100%" h="100%" alt={item.name} style={{ filter: 'drop-shadow(0px 15px 30px rgba(27,46,61,0.08))' }} />
                     </Box>
                     <Box mt="xl" px="md" style={{ flexGrow: 1 }}>
                       <Group justify="space-between" align="center">
@@ -281,12 +312,9 @@ export default function App() {
           </Container>
         </Box>
 
-        {/* ========================================== */}
-        {/* ПОДВАЛ (С новыми премиальными плашками) */}
-        {/* ========================================== */}
+        {/* ПОДВАЛ */}
         <Box bg="#1B2E3D" pt={{ base: 60, md: 100 }} pb={40} w="100%" style={{ position: 'relative', zIndex: 10 }}>
           <Container size="xl" w="100%">
-            
             <Center mb={{ base: 40, md: 60 }} style={{ flexDirection: 'column', textAlign: 'center' }}>
               <Badge variant="outline" color="rgba(255,255,255,0.2)" radius="xl" size="lg" ls={2} fw={800} py="sm" mb="xl">AY TEAM</Badge>
               <Title order={2} c="white" fw={900} size="clamp(32px, 5vw, 56px)" lh={1.1} tt="uppercase">
@@ -295,17 +323,12 @@ export default function App() {
             </Center>
 
             <Grid gutter={{ base: 30, md: 40 }}>
-              
-              {/* Блок Контактов - Интерактивные плашки Apple-style */}
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Paper p={{ base: 30, md: 50 }} radius="40px" bg="rgba(255,255,255,0.03)" withBorder={false} style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <Text size="xs" tt="uppercase" ls={2} c="rgba(255,255,255,0.4)" fw={800} mb="xl" ta="center">Отдел продаж</Text>
-                  
                   <Stack gap="md" w="100%" maw={320}>
-                    
-                    {/* Плашка Айдос */}
                     <UnstyledButton component="a" href="https://wa.me/77052727304" target="_blank" className="footer-pill">
-                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg">
                         <Group wrap="nowrap" justify="space-between">
                           <Group wrap="nowrap" gap="sm">
                             <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
@@ -316,14 +339,13 @@ export default function App() {
                               <Text c="white" fw={800} size="sm" lh={1.2}>+7 705 272 7304</Text>
                             </Box>
                           </Group>
-                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon"><Icons.ArrowRight /></Box>
                         </Group>
                       </Paper>
                     </UnstyledButton>
 
-                    {/* Плашка Темирлан */}
                     <UnstyledButton component="a" href="https://wa.me/77476509747" target="_blank" className="footer-pill">
-                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg">
                         <Group wrap="nowrap" justify="space-between">
                           <Group wrap="nowrap" gap="sm">
                             <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
@@ -334,14 +356,13 @@ export default function App() {
                               <Text c="white" fw={800} size="sm" lh={1.2}>+7 747 650 9747</Text>
                             </Box>
                           </Group>
-                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon"><Icons.ArrowRight /></Box>
                         </Group>
                       </Paper>
                     </UnstyledButton>
 
-                    {/* Плашка Инстаграм */}
                     <UnstyledButton component="a" href="https://instagram.com/ayteam_mebel" target="_blank" className="footer-pill">
-                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg" style={{ transition: 'all 0.3s' }}>
+                      <Paper radius="100px" p="8px 20px 8px 8px" bg="rgba(255,255,255,0.05)" withBorder={false} className="pill-bg">
                         <Group wrap="nowrap" justify="space-between">
                           <Group wrap="nowrap" gap="sm">
                             <Center w={40} h={40} bg="rgba(255,255,255,0.1)" c="white" style={{ borderRadius: '50%' }}>
@@ -352,30 +373,20 @@ export default function App() {
                               <Text c="white" fw={800} size="sm" lh={1.2}>@ayteam_mebel</Text>
                             </Box>
                           </Group>
-                          <Box c="rgba(255,255,255,0.2)" className="pill-icon" style={{ transition: 'all 0.3s' }}><Icons.ArrowRight /></Box>
+                          <Box c="rgba(255,255,255,0.2)" className="pill-icon"><Icons.ArrowRight /></Box>
                         </Group>
                       </Paper>
                     </UnstyledButton>
-
                   </Stack>
                 </Paper>
               </Grid.Col>
 
-              {/* Блок Yerniyaz - Строго по центру */}
               <Grid.Col span={{ base: 12, md: 6 }}>
                 <Paper p={{ base: 40, md: 50 }} radius="40px" bg="rgba(255,255,255,0.03)" withBorder={false} style={{ height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
-                  
                   <Badge variant="filled" bg="rgba(255,255,255,0.1)" c="white" radius="xl" size="sm" mb="md">IT / WEB</Badge>
                   <Text size="xs" tt="uppercase" ls={2} c="rgba(255,255,255,0.4)" fw={800} mb="xs">Digital Production</Text>
-                  
-                  <Title order={3} c="white" fw={900} size="32px" tt="uppercase" lh={1.2}>
-                    Создание <br/> IT-продуктов
-                  </Title>
-                  
-                  <Text c="rgba(255,255,255,0.5)" size="sm" mt="md" fw={500} maw={350} ta="center" mx="auto">
-                    Современные веб-каталоги, системы управления бизнесом и автоматизация.
-                  </Text>
-
+                  <Title order={3} c="white" fw={900} size="32px" tt="uppercase" lh={1.2}>Создание <br/> IT-продуктов</Title>
+                  <Text c="rgba(255,255,255,0.5)" size="sm" mt="md" fw={500} maw={350} ta="center" mx="auto">Современные веб-каталоги, системы управления бизнесом и автоматизация.</Text>
                   <Group justify="center" align="center" mt={40} gap={{ base: 'md', md: 'xl' }}>
                     <Stack gap={4} align="center">
                       <Text c="rgba(255,255,255,0.4)" size="10px" tt="uppercase" fw={800} ls={1}>Портфолио</Text>
@@ -386,215 +397,149 @@ export default function App() {
                       <Anchor href="https://wa.me/77066066323" target="_blank" c="white" fw={900} size="lg" className="nav-link">+7 706 606 6323</Anchor>
                     </Stack>
                   </Group>
-
                 </Paper>
               </Grid.Col>
-
             </Grid>
 
-            {/* Копирайт */}
             <Center mt={60}>
                <Text c="rgba(255,255,255,0.3)" fw={800} size="10px" tt="uppercase" ls={2} ta="center">
                  © 2026 AY TEAM x YERNIYAZ AGAEVICH. ALL RIGHTS RESERVED.
                </Text>
             </Center>
-
           </Container>
         </Box>
 
         {/* ========================================== */}
-        {/* МОДАЛКА ТОВАРА */}
+        {/* МОДАЛКА ТОВАРА (МАКСИМУМ МЕСТА ДЛЯ ФОТО) */}
         {/* ========================================== */}
         <Modal
           opened={!!selectedItem}
-          onClose={() => setSelectedItem(null)}
+          onClose={closeItem} 
           fullScreen
           transitionProps={{ transition: 'slide-up', duration: 400 }}
           withCloseButton={false}
           styles={{
             content: { backgroundColor: '#F8F9FA' }, 
-            body: { padding: '20px', height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column' } 
+            body: { padding: 0, height: '100dvh', overflow: 'hidden' } 
           }}
         >
           {selectedItem && (
-            <Flex h="100%" pos="relative" gap="20px" direction={{ base: 'column', lg: 'row' }}>
-              
-              <ActionIcon 
-                onClick={() => setSelectedItem(null)}
-                pos="fixed" top={30} right={30}
-                size={50} radius="100%" bg="#1B2E3D" c="white"
-                style={{ zIndex: 300, boxShadow: '0 10px 20px rgba(27,46,61,0.2)' }}
-                className="btn-hover"
-              >
-                <Icons.X />
-              </ActionIcon>
+            <Box h="100%" p={{ base: 0, lg: '20px' }}>
+              <Flex h="100%" pos="relative" gap={{ base: 0, lg: '20px' }} direction={{ base: 'column', lg: 'row' }}>
+                
+                <Box pos="fixed" top={{ base: 20, lg: 30 }} right={{ base: 20, lg: 30 }} style={{ zIndex: 300 }}>
+                  <ActionIcon onClick={closeItem} size={50} radius="100%" bg="#1B2E3D" c="white" style={{ boxShadow: '0 10px 20px rgba(27,46,61,0.2)' }} className="btn-hover">
+                    <Icons.X />
+                  </ActionIcon>
+                </Box>
 
-              {/* Сайдбар - Строгий размер фото */}
-              <Paper 
-                display={{ base: 'none', lg: 'flex' }}
-                flexDirection="column"
-                w={{ base: '100%', lg: '22%' }} h="100%" 
-                bg="white" radius="40px" withBorder={false}
-                style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}
-              >
-                <Center p="xl" style={{ borderBottom: '1px solid rgba(27,46,61,0.05)' }}>
-                  <Text fw={900} size="10px" tt="uppercase" ls={2} c="rgba(27,46,61,0.5)">Index / Models</Text>
-                </Center>
-                <ScrollArea h="100%" type="hover">
-                  <Stack gap={0}>
-                    {catalogData.map((item) => {
-                      const isActive = selectedItem.id === item.id;
-                      return (
-                        <UnstyledButton
-                          key={item.id}
-                          onClick={() => setSelectedItem(item)}
-                          p="lg"
-                          bg={isActive ? '#F8F9FA' : 'transparent'}
-                          style={{ transition: 'all 0.2s ease' }}
-                        >
-                          <Flex align="center" gap="md">
-                            {/* Строгий размер фото в списке бокового меню */}
-                            <Box w={50} h={50} p={6} bg="white" radius="10px" style={{ flexShrink: 0, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
-                              <Image src={`/images/${item.main}`} fit="contain" w="100%" h="100%" />
+                <Paper display={{ base: 'none', lg: 'flex' }} flexDirection="column" w={{ base: '100%', lg: '22%' }} h="100%" bg="white" radius={{ base: 0, lg: '40px' }} withBorder={false} style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+                  <Center p="xl" style={{ borderBottom: '1px solid rgba(27,46,61,0.05)' }}>
+                    <Text fw={900} size="10px" tt="uppercase" ls={2} c="rgba(27,46,61,0.5)">Index / Models</Text>
+                  </Center>
+                  <ScrollArea h="100%" type="hover">
+                    <Stack gap={0}>
+                      {catalogData.map((item) => {
+                        const isActive = selectedItem.id === item.id;
+                        return (
+                          <UnstyledButton key={item.id} onClick={() => openItem(item)} p="lg" bg={isActive ? '#F8F9FA' : 'transparent'} style={{ transition: 'all 0.2s ease' }}>
+                            <Flex align="center" gap="md">
+                              <Box w={50} h={50} p={6} bg="white" radius="10px" style={{ flexShrink: 0, boxShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+                                <Image src={`/images/${item.main}`} fit="contain" w="100%" h="100%" />
+                              </Box>
+                              <Text fw={isActive ? 800 : 600} size="sm" c={isActive ? '#1B2E3D' : 'rgba(27,46,61,0.6)'} tt="uppercase">{item.name}</Text>
+                            </Flex>
+                          </UnstyledButton>
+                        );
+                      })}
+                    </Stack>
+                  </ScrollArea>
+                </Paper>
+
+                {/* Контейнер для фото — занимает максимум места */}
+                <Paper w={{ base: '100%', lg: '50%' }} h={{ base: '55dvh', lg: '100%' }} bg="white" radius={{ base: 0, lg: '40px' }} withBorder={false} style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', position: 'relative' }}>
+                  {(() => {
+                    const slides = [selectedItem.main, selectedItem.render, ...(selectedItem.schemes || [])].filter(Boolean);
+                    return (
+                      <Carousel
+                        getEmblaApi={setEmbla}
+                        loop
+                        withIndicators
+                        height="100%"
+                        controlSize={50}
+                        className="custom-carousel"
+                        styles={{
+                          root: { height: '100%' },
+                          container: { height: '100%' },
+                          indicator: { width: 8, height: 8, radius: '50%', backgroundColor: 'rgba(27,46,61,0.2)', transition: 'all 0.3s ease', '&[data-active]': { backgroundColor: '#1B2E3D', transform: 'scale(1.5)' } },
+                          control: { backgroundColor: 'white', color: '#1B2E3D', border: 'none', boxShadow: '0 5px 15px rgba(27,46,61,0.1)', '&:hover': { backgroundColor: '#F8F9FA' } }
+                        }}
+                      >
+                        {slides.map((img, idx) => (
+                          <Carousel.Slide key={idx}>
+                            <Box className="image-zoom" onClick={() => openZoom(`/images/${img}`)} w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Image src={`/images/${img}`} h="100%" fit="contain" style={{ filter: 'drop-shadow(0 20px 40px rgba(27,46,61,0.08))' }} />
+                              <Box pos="absolute" top={{ base: 20, lg: 30 }} left={{ base: 20, lg: 30 }} bg="rgba(255,255,255,0.8)" p={10} style={{ borderRadius: '50%', backdropFilter: 'blur(5px)', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
+                                <Icons.ZoomIn />
+                              </Box>
                             </Box>
-                            <Text fw={isActive ? 800 : 600} size="sm" c={isActive ? '#1B2E3D' : 'rgba(27,46,61,0.6)'} tt="uppercase">
-                              {item.name}
-                            </Text>
-                          </Flex>
-                        </UnstyledButton>
-                      );
-                    })}
-                  </Stack>
-                </ScrollArea>
-              </Paper>
-
-              {/* Фото товара */}
-              <Paper 
-                w={{ base: '100%', lg: '50%' }} h={{ base: '45dvh', lg: '100%' }} 
-                bg="white" radius="40px" withBorder={false}
-                style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)', position: 'relative' }}
-              >
-                {(() => {
-                  const slides = [selectedItem.main, selectedItem.render, ...(selectedItem.schemes || [])].filter(Boolean);
-                  return (
-                    <Carousel
-                      getEmblaApi={setEmbla}
-                      loop
-                      withIndicators
-                      height="100%"
-                      controlSize={50}
-                      styles={{
-                        root: { height: '100%' },
-                        container: { height: '100%' },
-                        slide: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px' },
-                        indicator: { 
-                          width: 8, height: 8, radius: '50%', backgroundColor: 'rgba(27,46,61,0.2)',
-                          transition: 'all 0.3s ease',
-                          '&[data-active]': { backgroundColor: '#1B2E3D', transform: 'scale(1.5)' } 
-                        },
-                        control: { 
-                          backgroundColor: 'white', color: '#1B2E3D', border: 'none',
-                          boxShadow: '0 5px 15px rgba(27,46,61,0.1)',
-                          '&:hover': { backgroundColor: '#F8F9FA' }
-                        }
-                      }}
-                    >
-                      {slides.map((img, idx) => (
-                        <Carousel.Slide key={idx}>
-                          <Box 
-                            className="image-zoom"
-                            onClick={() => setZoomedImage(`/images/${img}`)}
-                            w="100%" h="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                          >
-                            <Image src={`/images/${img}`} h="100%" fit="contain" style={{ filter: 'drop-shadow(0 20px 40px rgba(27,46,61,0.08))' }} />
-                            <Box pos="absolute" top={30} left={30} bg="rgba(255,255,255,0.8)" p={10} style={{ borderRadius: '50%', backdropFilter: 'blur(5px)', boxShadow: '0 5px 15px rgba(0,0,0,0.05)' }}>
-                              <Icons.ZoomIn />
-                            </Box>
-                          </Box>
-                        </Carousel.Slide>
-                      ))}
-                    </Carousel>
-                  );
-                })()}
-              </Paper>
-
-              {/* Детали и заказ */}
-              <Paper 
-                w={{ base: '100%', lg: '28%' }} h={{ base: 'calc(55dvh - 60px)', lg: '100%' }} 
-                bg="white" radius="40px" withBorder={false}
-                style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}
-              >
-                <ScrollArea h="100%">
-                  <Stack p={{ base: '20px', md: '40px' }} gap="xl" h="100%">
-                    <Center style={{ flexDirection: 'column', textAlign: 'center' }}>
-                      <Badge variant="filled" bg="#1B2E3D" size="lg" radius="xl" ls={1} fw={800} py="sm" mb="lg">Модель</Badge>
-                      <Title order={2} fw={900} size="clamp(28px, 3vw, 36px)" lh={1} c="#1B2E3D" tt="uppercase">
-                        {selectedItem.name}
-                      </Title>
-                    </Center>
-
-                    <Center>
-                      <Box w="80%" h="1px" bg="rgba(27,46,61,0.05)" />
-                    </Center>
-
-                    <Box>
-                      <Center mb="md">
-                        <Text size="xs" c="rgba(27,46,61,0.5)" tt="uppercase" fw={800} ls={1}>Техническая база</Text>
-                      </Center>
-                      <SimpleGrid cols={2} spacing="md">
-                        {(selectedItem.schemes || []).map((s, i) => (
-                          <Paper key={i} p="md" radius="20px" bg="#F8F9FA" withBorder={false} onClick={() => setZoomedImage(`/images/${s}`)} style={{ cursor: 'zoom-in', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }} className="btn-hover">
-                            <Image src={`/images/${s}`} h={80} fit="contain" />
-                          </Paper>
+                          </Carousel.Slide>
                         ))}
-                        <Paper p="md" radius="20px" bg="#F8F9FA" withBorder={false} onClick={() => setZoomedImage(`/images/${selectedItem.render}`)} style={{ cursor: 'zoom-in', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }} className="btn-hover">
-                          <Image src={`/images/${selectedItem.render}`} h={80} fit="contain" />
-                        </Paper>
-                      </SimpleGrid>
-                    </Box>
+                      </Carousel>
+                    );
+                  })()}
+                </Paper>
 
-                    <Box mt="auto">
-                      <Center mb="sm">
-                        <Text size="10px" c="dimmed" tt="uppercase" fw={800} ls={1}>Связаться для заказа</Text>
+                <Paper w={{ base: '100%', lg: '28%' }} h={{ base: '45dvh', lg: '100%' }} bg="white" radius={{ base: 0, lg: '40px' }} withBorder={false} style={{ overflow: 'hidden', boxShadow: '0 10px 30px rgba(0,0,0,0.03)' }}>
+                  <ScrollArea h="100%">
+                    <Stack p={{ base: '20px', md: '40px' }} gap="xl" h="100%">
+                      <Center style={{ flexDirection: 'column', textAlign: 'center' }}>
+                        <Badge variant="filled" bg="#1B2E3D" size="lg" radius="xl" ls={1} fw={800} py="sm" mb="lg">Модель</Badge>
+                        <Title order={2} fw={900} size="clamp(28px, 3vw, 36px)" lh={1} c="#1B2E3D" tt="uppercase">
+                          {selectedItem.name}
+                        </Title>
                       </Center>
-                      <Grid gutter="sm">
-                        <Grid.Col span={6}>
-                          <Button
-                            component="a"
-                            href={`https://wa.me/77052727304?text=${encodeURIComponent(`Здравствуйте, Айдос! Интересует расчет модели AY TEAM: ${selectedItem.name}.`)}`}
-                            target="_blank"
-                            fullWidth radius="xl" h="50px" fw={700}
-                            style={{ backgroundColor: "#1B2E3D", color: "white", boxShadow: "0 5px 15px rgba(27,46,61,0.15)" }}
-                            className="btn-hover"
-                          >
-                            Айдос
-                          </Button>
-                        </Grid.Col>
-                        <Grid.Col span={6}>
-                          <Button
-                            component="a"
-                            href={`https://wa.me/77476509747?text=${encodeURIComponent(`Здравствуйте, Темирлан! Интересует расчет модели AY TEAM: ${selectedItem.name}.`)}`}
-                            target="_blank"
-                            fullWidth radius="xl" h="50px" fw={700}
-                            style={{ backgroundColor: "#1B2E3D", color: "white", boxShadow: "0 5px 15px rgba(27,46,61,0.15)" }}
-                            className="btn-hover"
-                          >
-                            Темирлан
-                          </Button>
-                        </Grid.Col>
-                      </Grid>
-                    </Box>
 
-                    <Center mt="xs">
-                      <Anchor href="https://wa.me/77066066323" target="_blank" c="rgba(27,46,61,0.4)" size="10px" fw={800} tt="uppercase" ls={1} className="nav-link">
-                        Web Dev by Yerniyaz
-                      </Anchor>
-                    </Center>
-                  </Stack>
-                </ScrollArea>
-              </Paper>
+                      <Center><Box w="80%" h="1px" bg="rgba(27,46,61,0.05)" /></Center>
 
-            </Flex>
+                      <Box>
+                        <Center mb="md"><Text size="xs" c="rgba(27,46,61,0.5)" tt="uppercase" fw={800} ls={1}>Техническая база</Text></Center>
+                        <SimpleGrid cols={2} spacing="md">
+                          {(selectedItem.schemes || []).map((s, i) => (
+                            <Paper key={i} p="md" radius="20px" bg="#F8F9FA" withBorder={false} onClick={() => openZoom(`/images/${s}`)} style={{ cursor: 'zoom-in', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }} className="btn-hover">
+                              <Image src={`/images/${s}`} h={80} fit="contain" />
+                            </Paper>
+                          ))}
+                          <Paper p="md" radius="20px" bg="#F8F9FA" withBorder={false} onClick={() => openZoom(`/images/${selectedItem.render}`)} style={{ cursor: 'zoom-in', boxShadow: '0 2px 10px rgba(0,0,0,0.02)' }} className="btn-hover">
+                            <Image src={`/images/${selectedItem.render}`} h={80} fit="contain" />
+                          </Paper>
+                        </SimpleGrid>
+                      </Box>
+
+                      <Box mt="auto">
+                        <Center mb="sm"><Text size="10px" c="dimmed" tt="uppercase" fw={800} ls={1}>Связаться для заказа</Text></Center>
+                        <Grid gutter="sm">
+                          <Grid.Col span={6}>
+                            <Button component="a" href={`https://wa.me/77052727304?text=${encodeURIComponent(`Здравствуйте, Айдос! Интересует расчет модели AY TEAM: ${selectedItem.name}. URL: ${window.location.href}`)}`} target="_blank" fullWidth radius="xl" h="50px" fw={700} style={{ backgroundColor: "#1B2E3D", color: "white", boxShadow: "0 5px 15px rgba(27,46,61,0.15)" }} className="btn-hover">
+                              Айдос
+                            </Button>
+                          </Grid.Col>
+                          <Grid.Col span={6}>
+                            <Button component="a" href={`https://wa.me/77476509747?text=${encodeURIComponent(`Здравствуйте, Темирлан! Интересует расчет модели AY TEAM: ${selectedItem.name}. URL: ${window.location.href}`)}`} target="_blank" fullWidth radius="xl" h="50px" fw={700} style={{ backgroundColor: "#1B2E3D", color: "white", boxShadow: "0 5px 15px rgba(27,46,61,0.15)" }} className="btn-hover">
+                              Темирлан
+                            </Button>
+                          </Grid.Col>
+                        </Grid>
+                      </Box>
+
+                      <Center mt="xs">
+                        <Anchor href="https://wa.me/77066066323" target="_blank" c="rgba(27,46,61,0.4)" size="10px" fw={800} tt="uppercase" ls={1} className="nav-link">Web Dev by Yerniyaz</Anchor>
+                      </Center>
+                    </Stack>
+                  </ScrollArea>
+                </Paper>
+              </Flex>
+            </Box>
           )}
         </Modal>
 
@@ -603,7 +548,7 @@ export default function App() {
         {/* ========================================== */}
         <Modal
           opened={!!zoomedImage}
-          onClose={() => setZoomedImage(null)}
+          onClose={closeZoom} 
           fullScreen
           transitionProps={{ transition: 'fade', duration: 300 }}
           withCloseButton={false}
@@ -615,33 +560,17 @@ export default function App() {
           {zoomedImage && (
             <Box w="100%" h="100%" onClick={() => setIsZoomScale(!isZoomScale)} style={{ cursor: isZoomScale ? 'zoom-out' : 'zoom-in', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
               
-              <ActionIcon 
-                onClick={(e) => { e.stopPropagation(); setZoomedImage(null); }}
-                pos="fixed" top={30} right={30}
-                size={50} radius="100%" bg="#1B2E3D" c="white"
-                style={{ zIndex: 300, boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}
-                className="btn-hover"
-              >
-                <Icons.X />
-              </ActionIcon>
+              <Box pos="fixed" top={{ base: 20, lg: 30 }} right={{ base: 20, lg: 30 }} style={{ zIndex: 300 }}>
+                <ActionIcon onClick={(e) => closeZoom(e)} size={50} radius="100%" bg="#1B2E3D" c="white" style={{ boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }} className="btn-hover">
+                  <Icons.X />
+                </ActionIcon>
+              </Box>
 
-              <Image 
-                src={zoomedImage} 
-                fit="contain" 
-                w="90%" h="90%" 
-                style={{ 
-                  transform: isZoomScale ? 'scale(1.8)' : 'scale(1)',
-                  transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
-                  filter: 'drop-shadow(0 40px 80px rgba(27,46,61,0.1))'
-                }} 
-              />
+              <Image src={zoomedImage} fit="contain" w={{ base: '100%', lg: '90%' }} h={{ base: '100%', lg: '90%' }} style={{ transform: isZoomScale ? 'scale(1.8)' : 'scale(1)', transition: 'transform 0.4s cubic-bezier(0.16, 1, 0.3, 1)', filter: 'drop-shadow(0 40px 80px rgba(27,46,61,0.1))' }} />
               
               <Paper pos="absolute" bottom={40} p="8px 20px" radius="xl" bg="white" withBorder={false} style={{ pointerEvents: 'none', boxShadow: '0 5px 15px rgba(27,46,61,0.05)' }}>
-                <Text size="xs" c="#1B2E3D" tt="uppercase" fw={800} ls={1}>
-                  {isZoomScale ? 'Отдалить' : 'Приблизить'}
-                </Text>
+                <Text size="xs" c="#1B2E3D" tt="uppercase" fw={800} ls={1}>{isZoomScale ? 'Отдалить' : 'Приблизить'}</Text>
               </Paper>
-
             </Box>
           )}
         </Modal>
