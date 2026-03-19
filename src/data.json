@@ -1,0 +1,412 @@
+[
+  {
+    "id": 2,
+    "name": "Edge 1",
+    "main": "ayteam_item_2_1.webp",
+    "schemes": [
+      "ayteam_item_2_2.webp",
+      "ayteam_item_2_3.webp"
+    ],
+    "render": "ayteam_item_2_4.webp"
+  },
+  {
+    "id": 3,
+    "name": "Edge 2",
+    "main": "ayteam_item_3_1.webp",
+    "schemes": [
+      "ayteam_item_3_2.webp",
+      "ayteam_item_3_3.webp"
+    ],
+    "render": "ayteam_item_3_4.webp"
+  },
+  {
+    "id": 4,
+    "name": "Edge 3",
+    "main": "ayteam_item_4_1.webp",
+    "schemes": [
+      "ayteam_item_4_2.webp",
+      "ayteam_item_4_3.webp"
+    ],
+    "render": "ayteam_item_4_4.webp"
+  },
+  {
+    "id": 5,
+    "name": "Edge",
+    "main": "ayteam_item_5_1.webp",
+    "schemes": [
+      "ayteam_item_5_2.webp",
+      "ayteam_item_5_3.webp"
+    ],
+    "render": "ayteam_item_5_4.webp"
+  },
+  {
+    "id": 6,
+    "name": "Edge soft",
+    "main": "ayteam_item_6_1.webp",
+    "schemes": [
+      "ayteam_item_6_2.webp",
+      "ayteam_item_6_3.webp"
+    ],
+    "render": "ayteam_item_6_4.webp"
+  },
+  {
+    "id": 7,
+    "name": "Plaza",
+    "main": "ayteam_item_7_1.webp",
+    "schemes": [
+      "ayteam_item_7_2.webp",
+      "ayteam_item_7_3.webp"
+    ],
+    "render": "ayteam_item_7_4.webp"
+  },
+  {
+    "id": 8,
+    "name": "Waves 15.5",
+    "main": "ayteam_item_8_1.webp",
+    "schemes": [
+      "ayteam_item_8_2.webp",
+      "ayteam_item_8_3.webp"
+    ],
+    "render": "ayteam_item_8_4.webp"
+  },
+  {
+    "id": 9,
+    "name": "Waves 15.5.10",
+    "main": "ayteam_item_9_1.webp",
+    "schemes": [
+      "ayteam_item_9_2.webp",
+      "ayteam_item_9_3.webp"
+    ],
+    "render": "ayteam_item_9_4.webp"
+  },
+  {
+    "id": 10,
+    "name": "Waves 15.1",
+    "main": "ayteam_item_10_1.webp",
+    "schemes": [
+      "ayteam_item_10_2.webp",
+      "ayteam_item_10_3.webp"
+    ],
+    "render": "ayteam_item_10_4.webp"
+  },
+  {
+    "id": 11,
+    "name": "Waves 18.7",
+    "main": "ayteam_item_11_1.webp",
+    "schemes": [
+      "ayteam_item_11_2.webp",
+      "ayteam_item_11_3.webp"
+    ],
+    "render": "ayteam_item_11_4.webp"
+  },
+  {
+    "id": 12,
+    "name": "XXX",
+    "main": "ayteam_item_12_1.webp",
+    "schemes": [
+      "ayteam_item_12_2.webp",
+      "ayteam_item_12_3.webp"
+    ],
+    "render": "ayteam_item_12_4.webp"
+  },
+  {
+    "id": 13,
+    "name": "Алия",
+    "main": "ayteam_item_13_1.webp",
+    "schemes": [
+      "ayteam_item_13_2.webp",
+      "ayteam_item_13_3.webp"
+    ],
+    "render": "ayteam_item_13_4.webp"
+  },
+  {
+    "id": 14,
+    "name": "Алмагуль",
+    "main": "ayteam_item_14_1.webp",
+    "schemes": [
+      "ayteam_item_14_2.webp",
+      "ayteam_item_14_3.webp"
+    ],
+    "render": "ayteam_item_14_4.webp"
+  },
+  {
+    "id": 15,
+    "name": "Альфия",
+    "main": "ayteam_item_15_1.webp",
+    "schemes": [
+      "ayteam_item_15_2.webp",
+      "ayteam_item_15_3.webp"
+    ],
+    "render": "ayteam_item_15_4.webp"
+  },
+  {
+    "id": 16,
+    "name": "алюминиевый профиль",
+    "main": "ayteam_item_16_1.webp",
+    "schemes": [
+      "ayteam_item_16_2.webp",
+      "ayteam_item_16_3.webp"
+    ],
+    "render": "ayteam_item_16_4.webp"
+  },
+  {
+    "id": 17,
+    "name": "Вертикальные интегрированные ручи",
+    "main": "ayteam_item_17_1.webp",
+    "schemes": [
+      "ayteam_item_17_2.webp",
+      "ayteam_item_17_3.webp"
+    ],
+    "render": "ayteam_item_17_4.webp"
+  },
+  {
+    "id": 18,
+    "name": "Гаухар",
+    "main": "ayteam_item_18_1.webp",
+    "schemes": [
+      "ayteam_item_18_2.webp",
+      "ayteam_item_18_3.webp"
+    ],
+    "render": "ayteam_item_18_4.webp"
+  },
+  {
+    "id": 19,
+    "name": "Дали",
+    "main": "ayteam_item_19_1.webp",
+    "schemes": [
+      "ayteam_item_19_2.webp",
+      "ayteam_item_19_3.webp"
+    ],
+    "render": "ayteam_item_19_4.webp"
+  },
+  {
+    "id": 20,
+    "name": "Дана",
+    "main": "ayteam_item_20_1.webp",
+    "schemes": [
+      "ayteam_item_20_2.webp",
+      "ayteam_item_20_3.webp"
+    ],
+    "render": "ayteam_item_20_4.webp"
+  },
+  {
+    "id": 21,
+    "name": "Дана 2",
+    "main": "ayteam_item_21_1.webp",
+    "schemes": [
+      "ayteam_item_21_2.webp",
+      "ayteam_item_21_3.webp"
+    ],
+    "render": "ayteam_item_21_4.webp"
+  },
+  {
+    "id": 22,
+    "name": "Дана 3",
+    "main": "ayteam_item_22_1.webp",
+    "schemes": [
+      "ayteam_item_22_2.webp",
+      "ayteam_item_22_3.webp"
+    ],
+    "render": "ayteam_item_22_4.webp"
+  },
+  {
+    "id": 23,
+    "name": "Дана glass",
+    "main": "ayteam_item_23_1.webp",
+    "schemes": [
+      "ayteam_item_23_2.webp",
+      "ayteam_item_23_3.webp"
+    ],
+    "render": "ayteam_item_23_4.webp"
+  },
+  {
+    "id": 24,
+    "name": "Дана нео",
+    "main": "ayteam_item_24_1.webp",
+    "schemes": [
+      "ayteam_item_24_2.webp",
+      "ayteam_item_24_3.webp"
+    ],
+    "render": "ayteam_item_24_4.webp"
+  },
+  {
+    "id": 25,
+    "name": "Диагональ",
+    "main": "ayteam_item_25_1.webp",
+    "schemes": [
+      "ayteam_item_25_2.webp",
+      "ayteam_item_25_3.webp"
+    ],
+    "render": "ayteam_item_25_4.webp"
+  },
+  {
+    "id": 26,
+    "name": "интегрированные ручки",
+    "main": "ayteam_item_26_1.webp",
+    "schemes": [
+      "ayteam_item_26_2.webp",
+      "ayteam_item_26_3.webp"
+    ],
+    "render": "ayteam_item_26_4.webp"
+  },
+  {
+    "id": 27,
+    "name": "Маджит",
+    "main": "ayteam_item_27_1.webp",
+    "schemes": [
+      "ayteam_item_27_2.webp",
+      "ayteam_item_27_3.webp"
+    ],
+    "render": "ayteam_item_27_4.webp"
+  },
+  {
+    "id": 28,
+    "name": "Меринда",
+    "main": "ayteam_item_28_1.webp",
+    "schemes": [
+      "ayteam_item_28_2.webp",
+      "ayteam_item_28_3.webp"
+    ],
+    "render": "ayteam_item_28_4.webp"
+  },
+  {
+    "id": 29,
+    "name": "Милания",
+    "main": "ayteam_item_29_1.webp",
+    "schemes": [
+      "ayteam_item_29_2.webp",
+      "ayteam_item_29_3.webp"
+    ],
+    "render": "ayteam_item_29_4.webp"
+  },
+  {
+    "id": 30,
+    "name": "Мирас 1",
+    "main": "ayteam_item_30_1.webp",
+    "schemes": [
+      "ayteam_item_30_2.webp",
+      "ayteam_item_30_3.webp"
+    ],
+    "render": "ayteam_item_30_4.webp"
+  },
+  {
+    "id": 31,
+    "name": "Молдинг",
+    "main": "ayteam_item_31_1.webp",
+    "schemes": [
+      "ayteam_item_31_2.webp",
+      "ayteam_item_31_3.webp"
+    ],
+    "render": "ayteam_item_31_4.webp"
+  },
+  {
+    "id": 33,
+    "name": "Параллел 2D",
+    "main": "ayteam_item_33_1.webp",
+    "schemes": [
+      "ayteam_item_33_2.webp",
+      "ayteam_item_33_3.webp"
+    ],
+    "render": "ayteam_item_33_4.webp"
+  },
+  {
+    "id": 34,
+    "name": "Параллел zero",
+    "main": "ayteam_item_34_1.webp",
+    "schemes": [
+      "ayteam_item_34_2.webp",
+      "ayteam_item_34_3.webp"
+    ],
+    "render": "ayteam_item_34_4.webp"
+  },
+  {
+    "id": 35,
+    "name": "Рейки",
+    "main": "ayteam_item_35_1.webp",
+    "schemes": [
+      "ayteam_item_35_2.webp",
+      "ayteam_item_35_3.webp"
+    ],
+    "render": "ayteam_item_35_4.webp"
+  },
+  {
+    "id": 37,
+    "name": "Салтанат",
+    "main": "ayteam_item_37_1.webp",
+    "schemes": [
+      "ayteam_item_37_2.webp",
+      "ayteam_item_37_3.webp"
+    ],
+    "render": "ayteam_item_37_4.webp"
+  },
+  {
+    "id": 38,
+    "name": "Талисман 1",
+    "main": "ayteam_item_38_1.webp",
+    "schemes": [
+      "ayteam_item_38_2.webp",
+      "ayteam_item_38_3.webp"
+    ],
+    "render": "ayteam_item_38_4.webp"
+  },
+  {
+    "id": 39,
+    "name": "Талисман 2",
+    "main": "ayteam_item_39_1.webp",
+    "schemes": [
+      "ayteam_item_39_2.webp",
+      "ayteam_item_39_3.webp"
+    ],
+    "render": ""
+  },
+  {
+    "id": 40,
+    "name": "Талисман волна",
+    "main": "ayteam_item_40_1.webp",
+    "schemes": [
+      "ayteam_item_40_2.webp",
+      "ayteam_item_40_3.webp"
+    ],
+    "render": "ayteam_item_40_4.webp"
+  },
+  {
+    "id": 41,
+    "name": "Фарида",
+    "main": "ayteam_item_41_1.webp",
+    "schemes": [
+      "ayteam_item_41_2.webp",
+      "ayteam_item_41_3.webp"
+    ],
+    "render": "ayteam_item_41_4.webp"
+  },
+  {
+    "id": 42,
+    "name": "Фарида zero",
+    "main": "ayteam_item_42_1.webp",
+    "schemes": [
+      "ayteam_item_42_2.webp",
+      "ayteam_item_42_3.webp"
+    ],
+    "render": "ayteam_item_42_4.webp"
+  },
+  {
+    "id": 43,
+    "name": "Фарида",
+    "main": "ayteam_item_43_1.webp",
+    "schemes": [
+      "ayteam_item_43_2.webp",
+      "ayteam_item_43_3.webp"
+    ],
+    "render": "ayteam_item_43_4.webp"
+  },
+  {
+    "id": 44,
+    "name": "Шпон фрезерованный",
+    "main": "ayteam_item_44_1.webp",
+    "schemes": [
+      "ayteam_item_44_2.webp",
+      "ayteam_item_44_3.webp"
+    ],
+    "render": "ayteam_item_44_4.webp"
+  }
+]
