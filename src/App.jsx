@@ -1,201 +1,412 @@
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import '@mantine/core/styles.css';
+import '@mantine/carousel/styles.css'; 
+
 import { 
-  MantineProvider, Image, Text, Title, Button, Group, 
-  Box, Flex, UnstyledButton, SimpleGrid, Stack, ScrollArea 
+  MantineProvider, Container, Grid, Image, Text, Title, Button, Group, 
+  Box, Flex, UnstyledButton, SimpleGrid, Stack, Modal, ScrollArea, Divider, Anchor, Badge
 } from '@mantine/core';
+import { Carousel } from '@mantine/carousel';
 
-// Импорт твоей сгенерированной базы
+// Твоя база данных
 import catalogData from './data.json'; 
-
-// Оригинальные импорты Vite
-import reactLogo from './assets/react.svg';
-import viteLogo from './assets/vite.svg';
 import './App.css';
 
 export default function App() {
-  const [count, setCount] = useState(0);
-  
-  // Стейт активного слайда
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [embla, setEmbla] = useState(null);
 
-  // Навигация (зацикленная)
-  const nextItem = () => setCurrentIndex((prev) => (prev + 1) % catalogData.length);
-  const prevItem = () => setCurrentIndex((prev) => (prev === 0 ? catalogData.length - 1 : prev - 1));
-
-  // Поддержка клавиатуры (Стрелки Влево/Вправо)
+  // Сброс слайдера при смене товара в модалке
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextItem();
-      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevItem();
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
-
-  const activeItem = catalogData[currentIndex];
-  const progressPercent = ((currentIndex + 1) / catalogData.length) * 100;
+    if (embla && selectedItem) {
+      embla.scrollTo(0, true);
+    }
+  }, [embla, selectedItem]);
 
   return (
     <MantineProvider defaultColorScheme="light">
-      {/* w="100%" - убирает баг с горизонтальным скроллом от 100vw 
-        h="100dvh" - динамическая высота, спасает от панелей мобильных браузеров
-      */}
-      <Box w="100%" h="100dvh" style={{ overflow: 'hidden' }} bg="#FFFFFF">
+      <Box bg="#FFFFFF" style={{ minHeight: '100vh', overflowX: 'hidden' }}>
         
-        {/* Индикатор прогресса наверху */}
-        <Box w="100%" h={4} bg="gray.2">
-          <Box h="100%" w={`${progressPercent}%`} bg="dark.9" style={{ transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+        {/* === HERO СЕКЦИЯ (FULLSCREEN 100DVH) === */}
+        <Box 
+          h="100dvh" 
+          w="100%" 
+          bg="#F8F9FA" 
+          pos="relative" 
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', borderBottom: '1px solid #000' }}
+        >
+          {/* Инстаграм сверху справа */}
+          <Anchor 
+            href="https://instagram.com/ayteam_mebel" 
+            target="_blank"
+            pos="absolute"
+            top={30}
+            right={{ base: 20, md: 40 }}
+            c="dark.9"
+            fw={800}
+            size="xs"
+            tt="uppercase"
+            ls={2}
+            style={{ zIndex: 10, borderBottom: '2px solid #000', textDecoration: 'none' }}
+          >
+            @ayteam_mebel
+          </Anchor>
+
+          <Container size="xl" ta="center">
+            <Image 
+              src="/logo.png" 
+              alt="AY TEAM" 
+              h={{ base: 45, md: 65 }} 
+              fit="contain"
+              mx="auto"
+              mb="2.5rem"
+            />
+            <Title order={1} fw={900} size="clamp(3.5rem, 12vw, 9rem)" c="dark.9" style={{ letterSpacing: '-5px', lineHeight: 0.85, textTransform: 'uppercase' }}>
+              AY TEAM
+            </Title>
+            <Text c="dark.9" size="sm" tt="uppercase" fw={800} ls={8} mt="xl">
+              Furniture Architecture
+            </Text>
+            
+            <Box maw={700} mx="auto" mt="4rem">
+              <Text c="gray.6" size="xl" fw={500} lh={1.6}>
+                Премиальные решения для интерьера. Математическая точность, строгие формы и бескомпромиссный минимализм. 
+                Каждый объект — манифест качества.
+              </Text>
+            </Box>
+
+            <Button 
+              component="a"
+              href="#catalog"
+              color="dark.9" 
+              size="xl" 
+              radius={0} 
+              mt="5rem" 
+              fw={900} 
+              tt="uppercase" 
+              ls={2}
+              h="5rem"
+              px="5rem"
+              style={{ transition: 'all 0.3s ease' }}
+            >
+              В каталог
+            </Button>
+          </Container>
+
+          {/* Декоративный скролл-индикатор */}
+          <Box pos="absolute" bottom={30} left="50%" style={{ transform: 'translateX(-50%)' }}>
+            <Box 
+              w={1} h={60} bg="gray.3" 
+              style={{ position: 'relative', overflow: 'hidden' }}
+            >
+              <Box 
+                w={1} h={30} bg="dark.9" 
+                style={{ 
+                  position: 'absolute', 
+                  top: 0, 
+                  animation: 'scrollDown 2s infinite ease-in-out' 
+                }} 
+              />
+            </Box>
+          </Box>
         </Box>
 
-        {/* Разделение экрана */}
-        <Flex h="calc(100dvh - 4px)" direction={{ base: 'column', lg: 'row' }}>
-          
-          {/* === ЛЕВАЯ ЧАСТЬ: ИЗОБРАЖЕНИЕ === */}
-          <Box 
-            w={{ base: '100%', lg: '65%' }} 
-            h={{ base: '45%', lg: '100%' }} // На мобилке картинка занимает 45% экрана, оставляя место тексту
-            pos="relative" 
-            bg="#F8F9FA"
-          >
-            {/* Логотип */}
-            <Box pos="absolute" top={{ base: 15, lg: 30 }} left={{ base: 15, lg: 40 }} style={{ zIndex: 10 }}>
-              <Image 
-                src="/logo.png" 
-                alt="AY TEAM" 
-                h={{ base: 20, lg: 30 }} 
-                fit="contain"
-                fallbackSrc="https://placehold.co/120x30/white/black?text=AY+TEAM" 
-              />
-            </Box>
+        {/* === КАТАЛОГ (GRID) === */}
+        <Box id="catalog" pt={{ base: '6rem', md: '10rem' }} pb="10rem">
+          <Container size="xl">
+            <Title order={2} fw={900} size="clamp(2.5rem, 6vw, 4.5rem)" c="dark.9" style={{ letterSpacing: '-2px', textTransform: 'uppercase' }} mb="6rem">
+              Коллекция '26
+            </Title>
 
-            {/* Главное фото товара (жестко вписано) */}
-            <Flex h="100%" w="100%" justify="center" align="center" p={{ base: '1rem', lg: '4rem' }}>
-              <Image
-                key={activeItem.id}
-                src={`/images/${activeItem.main}`}
-                h="100%"
-                w="100%"
-                fit="contain"
-                alt={activeItem.name}
-                style={{
-                  filter: 'drop-shadow(0px 20px 30px rgba(0,0,0,0.06))',
-                  animation: 'fadeIn 0.5s ease-out'
-                }}
-              />
-            </Flex>
-
-            {/* Навигация */}
-            <Flex pos="absolute" top={0} left={0} w="100%" h="100%" justify="space-between" align="center" px="md" style={{ pointerEvents: 'none' }}>
-              <UnstyledButton 
-                onClick={prevItem} 
-                p="xl" 
-                style={{ pointerEvents: 'auto', opacity: 0.3, transition: 'opacity 0.2s' }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = 0.3}
-              >
-                <Text size="3rem" fw={900} c="dark.9">←</Text>
-              </UnstyledButton>
-
-              <UnstyledButton 
-                onClick={nextItem} 
-                p="xl" 
-                style={{ pointerEvents: 'auto', opacity: 0.3, transition: 'opacity 0.2s' }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = 1}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = 0.3}
-              >
-                <Text size="3rem" fw={900} c="dark.9">→</Text>
-              </UnstyledButton>
-            </Flex>
-          </Box>
-
-          {/* === ПРАВАЯ ЧАСТЬ: СКРОЛЛИРУЕМАЯ ИНФОРМАЦИЯ === */}
-          {/* ScrollArea спасает нас, если контент слишком длинный. Сам экран не дергается */}
-          <ScrollArea 
-            w={{ base: '100%', lg: '35%' }} 
-            h={{ base: '55%', lg: '100%' }} 
-            bg="#FFFFFF"
-            type="hover"
-            style={{ borderLeft: '1px solid #E9ECEF' }}
-          >
-            <Box p={{ base: '1.5rem', lg: '4rem' }} style={{ display: 'flex', flexDirection: 'column', minHeight: '100%' }}>
-              <Stack gap="xl" style={{ flexGrow: 1 }}>
-                
-                <Box>
-                  <Group justify="space-between" align="center" mb="sm">
-                    <Text c="gray.5" fw={800} tt="uppercase" ls={2} size="xs">
-                      {activeItem.category || 'Premium Line'}
-                    </Text>
-                    <Text c="dark.9" fw={800} size="sm">
-                      {currentIndex + 1} / {catalogData.length}
-                    </Text>
-                  </Group>
-                  
-                  <Title order={1} fw={900} size={{ base: '2.2rem', lg: '3rem' }} lh={1.1} c="dark.9" style={{ letterSpacing: '-1.5px' }}>
-                    {activeItem.name}
-                  </Title>
-                  <Text c="gray.5" size="xs" tt="uppercase" fw={700} ls={2} mt="md">
-                    Артикул: {activeItem.id}
-                  </Text>
-                </Box>
-
-                {/* Блок схем */}
-                <Box mt="auto">
-                  <Text size="0.65rem" c="dark.9" mb="sm" tt="uppercase" fw={800} ls={1}>
-                    Техническая спецификация
-                  </Text>
-                  <SimpleGrid cols={2} spacing="xs">
-                    {activeItem.schemes.map((scheme, idx) => (
-                      <Box key={idx} bg="#F8F9FA" p="xs" style={{ border: '1px solid #E9ECEF' }}>
-                        <Image src={`/images/${scheme}`} h={{ base: 60, lg: 80 }} fit="contain" alt="Схема" />
-                      </Box>
-                    ))}
-                    <Box bg="#F8F9FA" p="xs" style={{ border: '1px solid #E9ECEF' }}>
-                      <Image src={`/images/${activeItem.render}`} h={{ base: 60, lg: 80 }} fit="contain" alt="Рендер" />
+            <Grid gutter={{ base: '2.5rem', md: '5rem' }}>
+              {catalogData.map((item) => (
+                <Grid.Col key={item.id} span={{ base: 12, sm: 6, lg: 6 }}>
+                  <Box 
+                    onClick={() => setSelectedItem(item)}
+                    style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column' }}
+                  >
+                    <Box 
+                      bg="#F7F7F7" 
+                      p={{ base: '2rem', md: '4rem' }}
+                      radius={0}
+                      style={{ 
+                        border: '1px solid #E9ECEF',
+                        transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.borderColor = '#000';
+                        e.currentTarget.style.backgroundColor = '#F2F2F2';
+                        e.currentTarget.firstChild.style.transform = 'scale(1.05)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.borderColor = '#E9ECEF';
+                        e.currentTarget.style.backgroundColor = '#F7F7F7';
+                        e.currentTarget.firstChild.style.transform = 'scale(1)';
+                      }}
+                    >
+                      <Image
+                        src={`/images/${item.main}`}
+                        height={450}
+                        fit="contain"
+                        alt={item.name}
+                        style={{ filter: 'drop-shadow(0px 25px 40px rgba(0,0,0,0.06))', transition: 'transform 0.6s ease' }}
+                      />
                     </Box>
-                  </SimpleGrid>
+                    <Title order={3} fw={900} size="2.5rem" c="dark.9" mt="2rem" style={{ letterSpacing: '-1.5px', textTransform: 'uppercase' }}>
+                      {item.name}
+                    </Title>
+                  </Box>
+                </Grid.Col>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* === БРУТАЛЬНЫЙ ПОДВАЛ (ТВОЯ РЕКЛАМА) === */}
+        <Box bg="dark.9" py="6rem" style={{ borderTop: '2px solid #000' }}>
+          <Container size="xl">
+            <Grid gutter="xl">
+              {/* Левая сторона: Инфо AY TEAM */}
+              <Grid.Col span={{ base: 12, md: 5 }}>
+                <Stack gap="xl">
+                  <Box>
+                    <Title order={3} c="white" fw={900} size="2rem" ls={1} tt="uppercase" mb="md">AY TEAM</Title>
+                    <Text c="gray.5" size="lg" maw={350} lh={1.5}>
+                      Производство мебели премиум-класса. Архитектурный подход к каждому метру.
+                    </Text>
+                  </Box>
+                  <Group gap="xl">
+                    <Anchor href="https://instagram.com/ayteam_mebel" target="_blank" c="white" fw={800} size="sm" tt="uppercase" ls={1}>
+                      Instagram
+                    </Anchor>
+                    <Anchor href="https://wa.me/77476509747" target="_blank" c="white" fw={800} size="sm" tt="uppercase" ls={1}>
+                      WhatsApp
+                    </Anchor>
+                  </Group>
+                  <Text c="gray.8" size="xs" mt="2rem">© 2026 AY TEAM. All rights reserved.</Text>
+                </Stack>
+              </Grid.Col>
+
+              {/* Правая сторона: Реклама Ернияза */}
+              <Grid.Col span={{ base: 12, md: 7 }}>
+                <Flex direction="column" align={{ base: 'flex-start', md: 'flex-end' }} gap="xl">
+                  <Box ta={{ base: 'left', md: 'right' }}>
+                    <Badge variant="outline" color="gray.7" radius={0} size="lg" mb="md" ls={2} fw={800}>Digital Production</Badge>
+                    <Title order={2} c="white" fw={900} size="2.5rem" tt="uppercase" ls={1}>Создание IT-продуктов</Title>
+                    <Text c="gray.5" size="md" mt="sm">Разработка современных каталогов и бизнес-систем.</Text>
+                  </Box>
+
+                  <Group gap="4rem" wrap="wrap" justify={{ base: 'flex-start', md: 'flex-end' }}>
+                    <Stack gap={4} align={{ base: 'flex-start', md: 'flex-end' }}>
+                      <Text c="gray.6" size="xs" tt="uppercase" fw={800} ls={2}>Портфолио</Text>
+                      <Anchor href="https://yeee.kz" target="_blank" c="white" fw={900} size="2rem" style={{ borderBottom: '3px solid #FFF', textDecoration: 'none' }}>
+                        YEEE.KZ
+                      </Anchor>
+                    </Stack>
+
+                    <Stack gap={4} align={{ base: 'flex-start', md: 'flex-end' }}>
+                      <Text c="gray.6" size="xs" tt="uppercase" fw={800} ls={2}>Прямая связь</Text>
+                      <Anchor href="https://wa.me/77066066323" target="_blank" c="white" fw={900} size="2rem" style={{ textDecoration: 'none' }}>
+                        +7 706 606 6323
+                      </Anchor>
+                    </Stack>
+                  </Group>
+
+                  <Text c="gray.7" fw={900} size="xs" tt="uppercase" ls={3}>Designed & Coded by Yerniyaz Agaevich</Text>
+                </Flex>
+              </Grid.Col>
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* === ПРЕМИАЛЬНАЯ МОДАЛКА (3-PANEL EDITORIAL) === */}
+        <Modal
+          opened={!!selectedItem}
+          onClose={() => setSelectedItem(null)}
+          fullScreen
+          transitionProps={{ transition: 'fade', duration: 250 }}
+          withCloseButton={false}
+          styles={{
+            content: { backgroundColor: '#FFFFFF' },
+            body: { padding: 0, height: '100dvh', overflow: 'hidden' } 
+          }}
+        >
+          {selectedItem && (
+            <Flex h="100dvh" direction={{ base: 'column', lg: 'row' }} pos="relative">
+              
+              {/* Крестик */}
+              <UnstyledButton 
+                onClick={() => setSelectedItem(null)}
+                pos="fixed"
+                top={25}
+                right={25}
+                p="md"
+                bg="#000"
+                style={{ borderRadius: '50%', zIndex: 200, boxShadow: '0 15px 30px rgba(0,0,0,0.3)', transition: 'transform 0.2s' }}
+                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              >
+                <Text size="md" fw={900} c="white" lh={1}>✕</Text>
+              </UnstyledButton>
+
+              {/* КОЛОНКА 1: ИНДЕКС КАТАЛОГА */}
+              <Box 
+                w={{ base: '100%', lg: '22%' }} 
+                h={{ base: '85px', lg: '100dvh' }} 
+                bg="#FFFFFF"
+                style={{ borderRight: '1px solid #E9ECEF', borderBottom: '1px solid #E9ECEF', zIndex: 100 }}
+              >
+                <Box p="xl" display={{ base: 'none', lg: 'block' }}>
+                  <Text fw={900} size="xs" tt="uppercase" ls={3} c="gray.4">Index / Models</Text>
                 </Box>
+                
+                <ScrollArea h={{ base: '85px', lg: 'calc(100dvh - 80px)' }} type="hover">
+                  <Flex direction={{ base: 'row', lg: 'column' }} h="100%">
+                    {catalogData.map((item) => {
+                      const isActive = selectedItem.id === item.id;
+                      return (
+                        <UnstyledButton
+                          key={item.id}
+                          onClick={() => setSelectedItem(item)}
+                          p={{ base: 'xs', lg: '1.2rem 2rem' }}
+                          bg={isActive ? '#F8F9FA' : 'transparent'}
+                          style={{ 
+                            borderBottom: '1px solid #F1F3F5',
+                            borderRight: { base: '1px solid #F1F3F5', lg: 'none' },
+                            minWidth: { base: '90px', lg: 'auto' },
+                            transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                          }}
+                        >
+                          <Flex align="center" gap="lg" direction={{ base: 'column', lg: 'row' }}>
+                            <Box w={45} h={45} p={6} bg="#FFF" style={{ border: isActive ? '1px solid #000' : '1px solid #EEE' }}>
+                              <Image src={`/images/${item.main}`} fit="contain" h="100%" />
+                            </Box>
+                            <Text fw={isActive ? 900 : 600} size="xs" tt="uppercase" display={{ base: 'none', lg: 'block' }} c={isActive ? 'black' : 'gray.5'} lineClamp={1} ls={0.5}>
+                              {item.name}
+                            </Text>
+                          </Flex>
+                        </UnstyledButton>
+                      );
+                    })}
+                  </Flex>
+                </ScrollArea>
+              </Box>
 
-                <Button
-                  component="a"
-                  href={`https://wa.me/77476509747?text=${encodeURIComponent(`Здравствуйте! Хочу заказать модель: ${activeItem.name} (ID: ${activeItem.id}).`)}`}
-                  target="_blank"
-                  color="dark.9"
-                  size="xl"
-                  radius={0}
-                  fullWidth
-                  fw={800}
-                  tt="uppercase"
-                  ls={2}
-                  h={{ base: '3.5rem', lg: '4.5rem' }}
-                >
-                  Оформить заказ
-                </Button>
-              </Stack>
+              {/* КОЛОНКА 2: ПОДИУМ (КАРУСЕЛЬ) */}
+              <Box 
+                w={{ base: '100%', lg: '53%' }} 
+                h={{ base: '45dvh', lg: '100dvh' }} 
+                bg="#F8F9FA"
+                pos="relative"
+                style={{ borderRight: '1px solid #E9ECEF' }}
+              >
+                {(() => {
+                  const slides = [selectedItem.main, selectedItem.render, ...(selectedItem.schemes || [])].filter(Boolean);
+                  return (
+                    <Carousel
+                      getEmblaApi={setEmbla}
+                      loop
+                      withIndicators
+                      height="100%"
+                      controlSize={45}
+                      styles={{
+                        root: { height: '100%' },
+                        container: { height: '100%' },
+                        slide: { display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem' },
+                        indicator: { width: 10, height: 2, radius: 0, backgroundColor: '#DEE2E6', '&[data-active]': { width: 40, backgroundColor: '#000' } },
+                        control: { borderRadius: 0, backgroundColor: '#FFF', border: '1px solid #000', color: '#000', boxShadow: 'none' }
+                      }}
+                    >
+                      {slides.map((img, idx) => (
+                        <Carousel.Slide key={idx}>
+                          <Image src={`/images/${img}`} h="100%" w="100%" fit="contain" style={{ filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.1))' }} />
+                        </Carousel.Slide>
+                      ))}
+                    </Carousel>
+                  );
+                })()}
+              </Box>
 
-              {/* Системный подвал с Vite кнопкой */}
-              <Flex justify="space-between" align="center" mt="2rem" pt="1.5rem" style={{ borderTop: '1px solid #F1F3F5' }}>
-                <Group gap="xs">
-                  <Button variant="subtle" color="gray.5" size="compact-xs" radius={0} onClick={() => setCount((c) => c + 1)}>
-                    TEST: {count}
-                  </Button>
-                  <Image src={viteLogo} w={14} h={14} alt="Vite" style={{ opacity: 0.5 }} />
-                  <Image src={reactLogo} w={14} h={14} alt="React" style={{ opacity: 0.5 }} />
-                </Group>
-                <Text c="gray.4" size="0.55rem" fw={800} tt="uppercase" ls={2}>
-                  AY TEAM © 2026
-                </Text>
-              </Flex>
-            </Box>
-          </ScrollArea>
+              {/* КОЛОНКА 3: ДЕТАЛИ И ЗАКАЗ */}
+              <ScrollArea 
+                w={{ base: '100%', lg: '25%' }} 
+                h={{ base: 'calc(55dvh - 85px)', lg: '100dvh' }}
+                bg="#FFFFFF"
+              >
+                <Container py={{ base: '3rem', lg: '6rem' }} px="xl">
+                  <Stack gap="xl">
+                    <Box>
+                      <Text c="gray.4" fw={900} size="xs" tt="uppercase" ls={3} mb="xs">Architectural Object</Text>
+                      <Title order={2} fw={900} size="3rem" lh={1} c="dark.9" style={{ letterSpacing: '-2px', textTransform: 'uppercase' }}>
+                        {selectedItem.name}
+                      </Title>
+                    </Box>
 
-        </Flex>
+                    <Divider color="gray.2" my="md" />
 
+                    <Box>
+                      <Text size="xs" c="gray.5" mb="xl" tt="uppercase" fw={800} ls={2}>Техническая база</Text>
+                      <SimpleGrid cols={2} spacing="md">
+                        {(selectedItem.schemes || []).map((s, i) => (
+                          <Box key={i} p="md" style={{ border: '1px solid #F1F3F5', backgroundColor: '#FAFAFA' }}>
+                            <Image src={`/images/${s}`} h={80} fit="contain" />
+                          </Box>
+                        ))}
+                        <Box p="md" style={{ border: '1px solid #F1F3F5', backgroundColor: '#FAFAFA' }}>
+                          <Image src={`/images/${selectedItem.render}`} h={80} fit="contain" />
+                        </Box>
+                      </SimpleGrid>
+                    </Box>
+
+                    <Button
+                      component="a"
+                      href={`https://wa.me/77476509747?text=${encodeURIComponent(`Здравствуйте! Интересует расчет модели AY TEAM: ${selectedItem.name}.`)}`}
+                      target="_blank"
+                      color="dark.9"
+                      size="xl"
+                      radius={0}
+                      fullWidth
+                      mt="2rem"
+                      fw={900}
+                      tt="uppercase"
+                      h="5.5rem"
+                      ls={1}
+                    >
+                      Заказать проект
+                    </Button>
+
+                    <Stack gap="xs" mt="3rem">
+                      <Divider label="Developer Support" labelPosition="center" color="gray.1" />
+                      <Anchor 
+                        href="https://wa.me/77066066323" 
+                        target="_blank" 
+                        ta="center" 
+                        c="dark.9" 
+                        size="sm" 
+                        fw={800} 
+                        tt="uppercase"
+                        ls={1}
+                        style={{ textDecoration: 'none' }}
+                      >
+                        Web Dev by Yerniyaz
+                      </Anchor>
+                    </Stack>
+                  </Stack>
+                </Container>
+              </ScrollArea>
+
+            </Flex>
+          )}
+        </Modal>
+
+        {/* Стили для анимации Hero */}
         <style>{`
-          @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.98); }
-            to { opacity: 1; transform: scale(1); }
+          @keyframes scrollDown {
+            0% { transform: translateY(-100%); }
+            50% { transform: translateY(100%); }
+            100% { transform: translateY(-100%); }
           }
+          #catalog { scroll-behavior: smooth; }
         `}</style>
 
       </Box>
