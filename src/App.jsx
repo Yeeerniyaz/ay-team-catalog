@@ -1,12 +1,12 @@
 /**
  * PROJECT: AY TEAM Fullscreen Showroom
- * VERSION: 8.0 (Mobile UX Perfection & Floating Dock)
+ * VERSION: 9.0 (Mobile Feed Perfection)
  * ROLE: Senior Architect
- * DESCRIPTION: Идеальные пропорции на смартфоне, крупные чертежи-свайпы, кнопка Fullscreen и контакты.
+ * DESCRIPTION: Десктоп - слайды. Мобилка - лента страниц по дизайну заказчика.
  */
 
 import React, { useState, useEffect } from 'react';
-import { MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip } from '@mantine/core';
+import { MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip, SimpleGrid, Group } from '@mantine/core';
 import { IconBrandWhatsapp, IconBrandInstagram, IconChevronDown, IconMaximize, IconMinimize, IconPhone } from '@tabler/icons-react';
 import catalogData from './data.json';
 import './index.css';
@@ -18,7 +18,7 @@ const theme = {
 export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Логика перехода в полноэкранный режим (как F11)
+  // Полноэкранный режим
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
@@ -31,11 +31,8 @@ export default function App() {
     }
   };
 
-  // Слушаем системные изменения полноэкранного режима
   useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement);
-    };
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
@@ -43,8 +40,7 @@ export default function App() {
   return (
     <MantineProvider theme={theme}>
       
-      {/* ПЛАВАЮЩАЯ ПАНЕЛЬ КОНТАКТОВ И УПРАВЛЕНИЯ (FLOATING DOCK) */}
-      {/* Видна всегда, поверх всех слайдов */}
+      {/* ПЛАВАЮЩАЯ ПАНЕЛЬ КОНТАКТОВ И УПРАВЛЕНИЯ */}
       <Paper
         pos="fixed"
         bottom={{ base: 20, md: 40 }}
@@ -86,10 +82,10 @@ export default function App() {
         </Flex>
       </Paper>
 
-      {/* --- ГЛОБАЛЬНЫЙ КОНТЕЙНЕР ПРЕЗЕНТАЦИИ --- */}
+      {/* ГЛОБАЛЬНЫЙ КОНТЕЙНЕР */}
       <Box className="snap-container">
         
-        {/* --- 1. ТИТУЛЬНЫЙ СЛАЙД (ОБЛОЖКА) --- */}
+        {/* --- 1. ТИТУЛЬНЫЙ СЛАЙД --- */}
         <Box className="snap-slide" bg="#000000" c="white" pos="relative">
            <Image 
              src="/images/ayteam_item_1_1.webp" 
@@ -110,16 +106,16 @@ export default function App() {
            </Box>
         </Box>
 
-        {/* --- 2. СЛАЙДЫ КАТАЛОГА --- */}
+        {/* --- 2. КАТАЛОГ ТОВАРОВ --- */}
         {catalogData.map((item, index) => {
           const pageNum = index + 1;
           
           return (
-          <Box key={item.id} className="snap-slide" bg="#ffffff">
+          <Box key={item.id} className="snap-slide" bg="transparent">
             
-            {/* --- ВЕРСИЯ ДЛЯ ПК (Landscape PDF Style) --- */}
-            <Flex h="100%" visibleFrom="md">
-              <Flex w={120} direction="column" align="center" justify="center" style={{ borderRight: '1px solid #f0f0f0' }} pos="relative" bg="#ffffff">
+            {/* ====== ВЕРСИЯ ДЛЯ ПК (Осталась полноэкранной) ====== */}
+            <Flex h="100%" visibleFrom="md" bg="#ffffff">
+              <Flex w={120} direction="column" align="center" justify="center" style={{ borderRight: '1px solid #f0f0f0' }} pos="relative">
                 <Title order={2} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '4px', textTransform: 'uppercase', color: '#1B2E3D', fontSize: '32px' }}>
                   {item.name}
                 </Title>
@@ -132,7 +128,7 @@ export default function App() {
                 <Image src={`/images/${item.main}`} h="100%" w="100%" fit="cover" />
               </Box>
 
-              <Flex w={400} direction="column" h="100%" style={{ borderLeft: '1px solid #f0f0f0' }} bg="#ffffff">
+              <Flex w={400} direction="column" h="100%" style={{ borderLeft: '1px solid #f0f0f0' }}>
                 <Box h="33.33%" p="xl" style={{ borderBottom: '1px solid #f0f0f0' }}>
                   {item.render && <Image src={`/images/${item.render}`} h="100%" fit="contain" />}
                 </Box>
@@ -148,59 +144,67 @@ export default function App() {
               </Flex>
             </Flex>
 
-            {/* --- МОБИЛЬНАЯ ВЕРСИЯ (Portrait 100dvh Perfection) --- */}
-            <Flex h="100%" direction="column" hiddenFrom="md" bg="#ffffff">
-              
-              {/* Шапка (10% высоты) */}
-              <Flex h="10%" align="center" justify="center" style={{ borderBottom: '1px solid #f0f0f0' }}>
-                <Title order={3} tt="uppercase" size="h4" c="#1B2E3D" tracking={3} fw={900}>
-                  {item.name}
-                </Title>
-              </Flex>
-
-              {/* Главное фото (55% высоты) */}
-              <Box h="55%" w="100%" bg="#f8f9fa" style={{ overflow: 'hidden' }}>
-                <Image src={`/images/${item.main}`} h="100%" w="100%" fit="cover" />
-              </Box>
-
-              {/* Нижний блок: Горизонтальный свайп крупных чертежей (35% высоты) */}
-              <Box h="35%" w="100%" bg="#ffffff" style={{ borderTop: '1px solid #f0f0f0', position: 'relative' }}>
+            {/* ====== МОБИЛЬНАЯ ВЕРСИЯ (Лента как на скриншоте) ====== */}
+            <Box hiddenFrom="md" p="sm" pb={0}>
+              <Paper radius="sm" p="md" shadow="xs" bg="white" pos="relative" style={{ border: '1px solid #eaeaea' }}>
                 
-                {/* Подсказка для свайпа */}
-                <Text pos="absolute" top={5} left={15} size="10px" c="dimmed" tt="uppercase" fw={700} tracking={2} zIndex={5}>
-                  Свайп для чертежей →
-                </Text>
-                
-                <Box className="horiz-scroll" h="100%" p="md">
-                  {/* Рендер крупно */}
-                  {item.render && (
-                    <Box className="horiz-item">
-                      <Image src={`/images/${item.render}`} h="100%" w="100%" fit="contain" />
-                    </Box>
-                  )}
-                  {/* Схема 1 крупно */}
-                  {item.schemes?.[0] && (
-                    <Box className="horiz-item">
-                      <Image src={`/images/${item.schemes[0]}`} h="100%" w="100%" fit="contain" />
-                    </Box>
-                  )}
-                  {/* Схема 2 крупно */}
-                  {item.schemes?.[1] && (
-                    <Box className="horiz-item" pos="relative">
-                      <Image src={`/images/${item.schemes[1]}`} h="100%" w="100%" fit="contain" />
-                    </Box>
-                  )}
+                {/* Шапка карточки */}
+                <Flex direction="column" align="center" mb="md" pt="xs">
+                  <Title order={3} tt="uppercase" size="h4" c="#1B2E3D" fw={900} tracking={1}>
+                    {item.name}
+                  </Title>
+                  <Text size="8px" c="dimmed" tt="uppercase" tracking={2} fw={700} mt={3}>
+                    AY TEAM CATALOG 2026
+                  </Text>
+                </Flex>
+
+                {/* Главное фото */}
+                <Box mb="lg" style={{ borderRadius: '4px', overflow: 'hidden' }}>
+                  <Image src={`/images/${item.main}`} w="100%" fit="cover" />
                 </Box>
 
-                {/* Номер страницы */}
-                <Text pos="absolute" bottom={10} left={15} size="12px" c="dimmed" fw={900}>
-                  {pageNum < 10 ? `0${pageNum}` : pageNum} / {catalogData.length}
-                </Text>
-              </Box>
+                {/* Три миниатюры ровно в ряд (Рендер + Схемы) */}
+                <SimpleGrid cols={3} spacing="xs" mb="md" align="flex-end">
+                  <Box h={80}>
+                    {item.render ? <Image src={`/images/${item.render}`} h="100%" fit="contain" /> : null}
+                  </Box>
+                  <Box h={80}>
+                    {item.schemes?.[0] ? <Image src={`/images/${item.schemes[0]}`} h="100%" fit="contain" /> : null}
+                  </Box>
+                  <Box h={80}>
+                    {item.schemes?.[1] ? <Image src={`/images/${item.schemes[1]}`} h="100%" fit="contain" /> : null}
+                  </Box>
+                </SimpleGrid>
 
-            </Flex>
+                {/* Номер страницы */}
+                <Text pos="absolute" bottom={10} right={15} size="10px" c="dimmed" fw={900}>
+                  {pageNum < 10 ? `0${pageNum}` : pageNum}
+                </Text>
+
+              </Paper>
+            </Box>
+
           </Box>
         )})}
+
+        {/* --- 3. ФИНАЛЬНЫЙ СЛАЙД --- */}
+        <Box className="snap-slide" bg="#000000" c="white">
+           <Flex direction="column" align="center" justify="center" h="100%">
+              <Title order={2} style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }} tracking={5} tt="uppercase" mb="xl" ta="center">
+                ИНДИВИДУАЛЬНЫЙ<br/>ПОДХОД
+              </Title>
+              <Text c="dimmed" mb={50} tracking={2} tt="uppercase" size="sm">Свяжитесь с нами для заказа</Text>
+              
+              <Group gap="xl">
+                <ActionIcon variant="transparent" c="#ff6600" size="xl" component="a" href="https://wa.me/77476509747" target="_blank">
+                  <IconBrandWhatsapp size={60} stroke={1.5} />
+                </ActionIcon>
+                <ActionIcon variant="transparent" c="white" size="xl" component="a" href="https://instagram.com/ayteam_mebel" target="_blank">
+                  <IconBrandInstagram size={60} stroke={1.5} />
+                </ActionIcon>
+              </Group>
+           </Flex>
+        </Box>
 
       </Box>
     </MantineProvider>
