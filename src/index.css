@@ -1,7 +1,7 @@
 /**
- * PROJECT: AY TEAM Catalog
+ * PROJECT: AY TEAM Fullscreen Showroom
  * ROLE: Senior Architect
- * DESCRIPTION: Адаптивный скролл. На ПК - презентация, на смартфоне - лента.
+ * DESCRIPTION: Жесткий полноэкранный свайп для всех устройств (1 слайд = 1 экран).
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap');
@@ -9,8 +9,11 @@
 html, body {
   margin: 0;
   padding: 0;
+  height: 100vh;
+  height: 100dvh; /* Динамическая высота для обхода шторок мобильных браузеров */
+  overflow: hidden; /* Строго запрещаем обычный скролл */
   font-family: 'Montserrat', sans-serif;
-  background-color: #f4f5f7; /* Цвет фона для мобильной ленты */
+  background-color: #000000;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -22,26 +25,24 @@ html, body {
   height: 100vh;
   height: 100dvh;
   width: 100vw;
-  overflow-y: auto;
-  overflow-x: hidden;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory; /* Включаем магнитный скролл ВЕЗДЕ */
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .snap-container::-webkit-scrollbar {
   display: none;
 }
 
-/* Десктопная магия: включаем жесткие слайды только на больших экранах */
-@media (min-width: 992px) {
-  .snap-container {
-    scroll-snap-type: y mandatory;
-    background-color: #000000;
-  }
-  .snap-slide {
-    height: 100vh;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-  }
+.snap-slide {
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  scroll-snap-align: start; /* Магнит к верхнему краю */
+  scroll-snap-stop: always; /* Один свайп = строго один слайд */
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes bounce {

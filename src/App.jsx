@@ -1,13 +1,14 @@
 /**
  * PROJECT: AY TEAM Fullscreen Showroom
- * VERSION: 9.0 (Mobile Feed Perfection)
+ * VERSION: 11.0 (Mobile Bottom Dock & Easy Proportions)
  * ROLE: Senior Architect
- * DESCRIPTION: Десктоп - слайды. Мобилка - лента страниц по дизайну заказчика.
+ * DESCRIPTION: Десктоп идеален. На мобилке кнопки снизу (Dock) + вынесены настройки пропорций экрана.
  */
 
 import React, { useState, useEffect } from 'react';
-import { MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip, SimpleGrid, Group } from '@mantine/core';
+import { MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip } from '@mantine/core';
 import { IconBrandWhatsapp, IconBrandInstagram, IconChevronDown, IconMaximize, IconMinimize, IconPhone } from '@tabler/icons-react';
+import { useMediaQuery } from '@mantine/hooks';
 import catalogData from './data.json';
 import './index.css';
 
@@ -15,19 +16,26 @@ const theme = {
   fontFamily: 'Montserrat, sans-serif',
 };
 
+// =====================================================================
+// ⚙️ УПРАВЛЕНИЕ ПРОПОРЦИЯМИ (ТОЛЬКО ДЛЯ МОБИЛЬНОЙ ВЕРСИИ)
+// Вы можете менять эти проценты. Главное, чтобы в сумме было 100%
+// =====================================================================
+const MOBILE_LAYOUT = {
+  header: '10%',    // Высота блока с названием мебели (Шапка)
+  mainImage: '65%', // Высота главного большого фото
+  thumbnails: '25%' // Высота трех нижних миниатюр (рендер + схемы)
+};
+// =====================================================================
+
 export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 48em)'); // Проверка на мобилку
 
-  // Полноэкранный режим
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch((err) => {
-        console.error(`Ошибка при переходе в полный экран: ${err.message}`);
-      });
+      document.documentElement.requestFullscreen().catch(err => console.error(err));
     } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      }
+      if (document.exitFullscreen) document.exitFullscreen();
     }
   };
 
@@ -40,52 +48,57 @@ export default function App() {
   return (
     <MantineProvider theme={theme}>
       
-      {/* ПЛАВАЮЩАЯ ПАНЕЛЬ КОНТАКТОВ И УПРАВЛЕНИЯ */}
+      {/* --- ПЛАВАЮЩЕЕ УПРАВЛЕНИЕ (GLASSMORPHISM DOCK) --- */}
+      {/* На ПК - справа сбоку (вертикально). На МОБИЛКЕ - снизу по центру (горизонтально) */}
       <Paper
         pos="fixed"
-        bottom={{ base: 20, md: 40 }}
-        right={{ base: 10, md: 40 }}
-        zIndex={9999}
+        bottom={isMobile ? 20 : 40}
+        left={isMobile ? '50%' : 'auto'}
+        right={isMobile ? 'auto' : 40}
+        zIndex={99999} 
         radius="xl"
         p="xs"
-        bg="rgba(255, 255, 255, 0.85)"
+        bg="rgba(255, 255, 255, 0.4)" 
         style={{ 
-          backdropFilter: 'blur(15px)', 
-          border: '1px solid rgba(0,0,0,0.1)', 
-          boxShadow: '0 20px 40px rgba(0,0,0,0.2)' 
+          transform: isMobile ? 'translateX(-50%)' : 'none', // Центрируем на мобилке
+          backdropFilter: 'blur(20px)', 
+          WebkitBackdropFilter: 'blur(20px)', 
+          border: '1px solid rgba(255,255,255,0.5)', 
+          boxShadow: '0 10px 30px rgba(0,0,0,0.2)' 
         }}
       >
-        <Flex direction="column" gap="md" align="center">
-          <Tooltip label="На весь экран" position="left" withArrow>
-            <ActionIcon size="xl" radius="xl" variant="subtle" color="dark" onClick={toggleFullscreen}>
-              {isFullscreen ? <IconMinimize size={24} /> : <IconMaximize size={24} />}
+        {/* Flex меняет направление: row (в ряд) на мобилке, column (в столбик) на ПК */}
+        <Flex direction={isMobile ? 'row' : 'column'} gap="md" align="center" px={isMobile ? "sm" : 0}>
+          <Tooltip label="На весь экран" position={isMobile ? "top" : "left"} withArrow>
+            <ActionIcon size="xl" radius="xl" variant="transparent" c="dark.9" onClick={toggleFullscreen}>
+              {isFullscreen ? <IconMinimize size={26} stroke={1.5} /> : <IconMaximize size={26} stroke={1.5} />}
             </ActionIcon>
           </Tooltip>
 
-          <Tooltip label="Позвонить" position="left" withArrow>
-            <ActionIcon size="xl" radius="xl" variant="light" color="dark" component="a" href="tel:+77476509747">
-              <IconPhone size={24} />
+          <Tooltip label="Позвонить" position={isMobile ? "top" : "left"} withArrow>
+            <ActionIcon size="xl" radius="xl" variant="transparent" c="dark.9" component="a" href="tel:+77476509747">
+              <IconPhone size={26} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
 
-          <Tooltip label="WhatsApp" position="left" withArrow>
-            <ActionIcon size="xl" radius="xl" variant="filled" color="green.6" component="a" href="https://wa.me/77476509747" target="_blank">
-              <IconBrandWhatsapp size={26} />
+          <Tooltip label="WhatsApp" position={isMobile ? "top" : "left"} withArrow>
+            <ActionIcon size="xl" radius="xl" variant="transparent" c="#25D366" component="a" href="https://wa.me/77476509747" target="_blank">
+              <IconBrandWhatsapp size={28} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
 
-          <Tooltip label="Instagram" position="left" withArrow>
-            <ActionIcon size="xl" radius="xl" variant="filled" color="dark" component="a" href="https://instagram.com/ayteam_mebel" target="_blank" bg="linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%)">
-              <IconBrandInstagram size={26} />
+          <Tooltip label="Instagram" position={isMobile ? "top" : "left"} withArrow>
+            <ActionIcon size="xl" radius="xl" variant="transparent" c="#E1306C" component="a" href="https://instagram.com/ayteam_mebel" target="_blank">
+              <IconBrandInstagram size={28} stroke={1.5} />
             </ActionIcon>
           </Tooltip>
         </Flex>
       </Paper>
 
-      {/* ГЛОБАЛЬНЫЙ КОНТЕЙНЕР */}
+      {/* --- ГЛОБАЛЬНЫЙ КОНТЕЙНЕР ПРЕЗЕНТАЦИИ --- */}
       <Box className="snap-container">
         
-        {/* --- 1. ТИТУЛЬНЫЙ СЛАЙД --- */}
+        {/* СЛАЙД 1: ОБЛОЖКА */}
         <Box className="snap-slide" bg="#000000" c="white" pos="relative">
            <Image 
              src="/images/ayteam_item_1_1.webp" 
@@ -95,26 +108,26 @@ export default function App() {
               <Title order={1} style={{ fontSize: 'clamp(3rem, 10vw, 6rem)' }} tracking={10} tt="uppercase" fw={900}>
                 AYTEAM
               </Title>
-              <Text size="sm" tracking={8} mt="lg" c="dimmed" tt="uppercase">
+              <Text size="sm" tracking={8} mt="lg" c="dimmed" tt="uppercase" ta="center">
                 SHOWROOM 2026
               </Text>
            </Flex>
-           <Box pos="absolute" bottom={40} left={0} right={0} ta="center" zIndex={2}>
+           <Box pos="absolute" bottom={100} left={0} right={0} ta="center" zIndex={2}>
               <ActionIcon variant="transparent" c="white" size="xl" className="bounce" mx="auto">
                  <IconChevronDown size={40} />
               </ActionIcon>
            </Box>
         </Box>
 
-        {/* --- 2. КАТАЛОГ ТОВАРОВ --- */}
+        {/* СЛАЙДЫ КАТАЛОГА */}
         {catalogData.map((item, index) => {
           const pageNum = index + 1;
           
           return (
-          <Box key={item.id} className="snap-slide" bg="transparent">
+          <Box key={item.id} className="snap-slide" bg="#ffffff">
             
-            {/* ====== ВЕРСИЯ ДЛЯ ПК (Осталась полноэкранной) ====== */}
-            <Flex h="100%" visibleFrom="md" bg="#ffffff">
+            {/* ====== ПК ВЕРСИЯ (Альбомная - ИДЕАЛЬНАЯ, БЕЗ ИЗМЕНЕНИЙ) ====== */}
+            <Flex h="100%" visibleFrom="md">
               <Flex w={120} direction="column" align="center" justify="center" style={{ borderRight: '1px solid #f0f0f0' }} pos="relative">
                 <Title order={2} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '4px', textTransform: 'uppercase', color: '#1B2E3D', fontSize: '32px' }}>
                   {item.name}
@@ -124,8 +137,8 @@ export default function App() {
                 </Text>
               </Flex>
 
-              <Box flex={1} h="100%" bg="#f8f9fa">
-                <Image src={`/images/${item.main}`} h="100%" w="100%" fit="cover" />
+              <Box flex={1} h="100%" bg="#f8f9fa" p="xl">
+                <Image src={`/images/${item.main}`} h="100%" w="100%" fit="contain" />
               </Box>
 
               <Flex w={400} direction="column" h="100%" style={{ borderLeft: '1px solid #f0f0f0' }}>
@@ -144,65 +157,49 @@ export default function App() {
               </Flex>
             </Flex>
 
-            {/* ====== МОБИЛЬНАЯ ВЕРСИЯ (Лента как на скриншоте) ====== */}
-            <Box hiddenFrom="md" p="sm" pb={0}>
-              <Paper radius="sm" p="md" shadow="xs" bg="white" pos="relative" style={{ border: '1px solid #eaeaea' }}>
-                
-                {/* Шапка карточки */}
-                <Flex direction="column" align="center" mb="md" pt="xs">
-                  <Title order={3} tt="uppercase" size="h4" c="#1B2E3D" fw={900} tracking={1}>
-                    {item.name}
-                  </Title>
-                  <Text size="8px" c="dimmed" tt="uppercase" tracking={2} fw={700} mt={3}>
-                    AY TEAM CATALOG 2026
-                  </Text>
-                </Flex>
+            {/* ====== МОБИЛЬНАЯ ВЕРСИЯ С УПРАВЛЕНИЕМ ПРОПОРЦИЯМИ ====== */}
+            {/* Используем константу MOBILE_LAYOUT для высоты блоков */}
+            <Flex h="100%" direction="column" hiddenFrom="md" bg="#ffffff" pos="relative" pb={isMobile ? 80 : 0}>
+              
+              {/* Шапка */}
+              <Flex h={MOBILE_LAYOUT.header} align="center" justify="center" style={{ borderBottom: '1px solid #f0f0f0' }}>
+                <Title order={3} tt="uppercase" size="h4" c="#1B2E3D" tracking={2} fw={900} ta="center" px="sm">
+                  {item.name}
+                </Title>
+              </Flex>
 
-                {/* Главное фото */}
-                <Box mb="lg" style={{ borderRadius: '4px', overflow: 'hidden' }}>
-                  <Image src={`/images/${item.main}`} w="100%" fit="cover" />
+              {/* Главное фото */}
+              <Box h={MOBILE_LAYOUT.mainImage} w="100%" bg="#f8f9fa" p="sm">
+                <Image src={`/images/${item.main}`} h="100%" w="100%" fit="contain" />
+              </Box>
+
+              {/* Миниатюры внизу */}
+              <Flex h={MOBILE_LAYOUT.thumbnails} w="100%" p="xs" gap="xs" style={{ borderTop: '1px solid #f0f0f0' }} bg="#ffffff">
+                <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0' }} p={4}>
+                  {item.render && <Image src={`/images/${item.render}`} h="100%" w="100%" fit="contain" />}
                 </Box>
-
-                {/* Три миниатюры ровно в ряд (Рендер + Схемы) */}
-                <SimpleGrid cols={3} spacing="xs" mb="md" align="flex-end">
-                  <Box h={80}>
-                    {item.render ? <Image src={`/images/${item.render}`} h="100%" fit="contain" /> : null}
-                  </Box>
-                  <Box h={80}>
-                    {item.schemes?.[0] ? <Image src={`/images/${item.schemes[0]}`} h="100%" fit="contain" /> : null}
-                  </Box>
-                  <Box h={80}>
-                    {item.schemes?.[1] ? <Image src={`/images/${item.schemes[1]}`} h="100%" fit="contain" /> : null}
-                  </Box>
-                </SimpleGrid>
-
-                {/* Номер страницы */}
-                <Text pos="absolute" bottom={10} right={15} size="10px" c="dimmed" fw={900}>
-                  {pageNum < 10 ? `0${pageNum}` : pageNum}
-                </Text>
-
-              </Paper>
-            </Box>
+                <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0' }} p={4}>
+                  {item.schemes?.[0] && <Image src={`/images/${item.schemes[0]}`} h="100%" w="100%" fit="contain" />}
+                </Box>
+                <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0' }} p={4} pos="relative">
+                  {item.schemes?.[1] && <Image src={`/images/${item.schemes[1]}`} h="100%" w="100%" fit="contain" />}
+                  <Text pos="absolute" top={2} right={5} size="10px" c="dimmed" fw={900}>
+                    {pageNum < 10 ? `0${pageNum}` : pageNum}
+                  </Text>
+                </Box>
+              </Flex>
+            </Flex>
 
           </Box>
         )})}
 
-        {/* --- 3. ФИНАЛЬНЫЙ СЛАЙД --- */}
+        {/* ФИНАЛЬНЫЙ СЛАЙД */}
         <Box className="snap-slide" bg="#000000" c="white">
-           <Flex direction="column" align="center" justify="center" h="100%">
+           <Flex direction="column" align="center" justify="center" h="100%" pb={80}>
               <Title order={2} style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }} tracking={5} tt="uppercase" mb="xl" ta="center">
-                ИНДИВИДУАЛЬНЫЙ<br/>ПОДХОД
+                AYTEAM
               </Title>
-              <Text c="dimmed" mb={50} tracking={2} tt="uppercase" size="sm">Свяжитесь с нами для заказа</Text>
-              
-              <Group gap="xl">
-                <ActionIcon variant="transparent" c="#ff6600" size="xl" component="a" href="https://wa.me/77476509747" target="_blank">
-                  <IconBrandWhatsapp size={60} stroke={1.5} />
-                </ActionIcon>
-                <ActionIcon variant="transparent" c="white" size="xl" component="a" href="https://instagram.com/ayteam_mebel" target="_blank">
-                  <IconBrandInstagram size={60} stroke={1.5} />
-                </ActionIcon>
-              </Group>
+              <Text c="dimmed" mb={50} tracking={2} tt="uppercase" size="sm" ta="center">Идеальная мебель<br/>для вашего интерьера</Text>
            </Flex>
         </Box>
 
