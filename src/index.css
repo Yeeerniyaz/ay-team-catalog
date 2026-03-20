@@ -1,7 +1,7 @@
 /**
  * PROJECT: AY TEAM Fullscreen Showroom
  * ROLE: Senior Architect
- * DESCRIPTION: CSS Scroll Snap для эффекта презентации. Без скроллбаров.
+ * DESCRIPTION: CSS Scroll Snap, Dynamic Viewport (100dvh) и горизонтальные свайпы.
  */
 
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap');
@@ -10,7 +10,8 @@ html, body {
   margin: 0;
   padding: 0;
   height: 100vh;
-  overflow: hidden; /* Запрещаем обычный скролл страницы */
+  height: 100dvh; /* Решает проблему обрезанного низа на смартфонах */
+  overflow: hidden; 
   font-family: 'Montserrat', sans-serif;
   background-color: #000000;
   -webkit-font-smoothing: antialiased;
@@ -20,14 +21,14 @@ html, body {
   box-sizing: border-box;
 }
 
-/* Контейнер, который мы будем скроллить */
+/* Глобальный контейнер презентации */
 .snap-container {
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
   overflow-y: scroll;
-  scroll-snap-type: y mandatory; /* Жесткая привязка по вертикали */
+  scroll-snap-type: y mandatory; 
   
-  /* Прячем скроллбар, чтобы выглядело как нативное приложение */
   scrollbar-width: none; /* Firefox */
   -ms-overflow-style: none;  /* IE 10+ */
 }
@@ -36,17 +37,37 @@ html, body {
   display: none; /* Chrome, Safari, Edge */
 }
 
-/* Сам слайд */
+/* Слайд на весь экран */
 .snap-slide {
   height: 100vh;
+  height: 100dvh;
   width: 100vw;
-  scroll-snap-align: start; /* Магнитимся к началу слайда */
-  scroll-snap-stop: always; /* Запрещаем пролетать мимо слайдов при сильном свайпе */
+  scroll-snap-align: start; 
+  scroll-snap-stop: always; 
   position: relative;
   overflow: hidden;
 }
 
-/* Анимация для стрелочки вниз на первом экране */
+/* Горизонтальный свайп для мобильных чертежей */
+.horiz-scroll {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.horiz-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.horiz-item {
+  flex: 0 0 85%; /* Чертеж занимает 85% ширины экрана, чтобы было видно, что можно листать */
+  height: 100%;
+  scroll-snap-align: center;
+  padding: 0 5px;
+}
+
+/* Анимация подсказки */
 @keyframes bounce {
   0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
   40% { transform: translateY(-15px); }
