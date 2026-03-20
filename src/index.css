@@ -1,0 +1,58 @@
+/**
+ * PROJECT: AY TEAM Fullscreen Showroom
+ * ROLE: Senior Architect
+ * DESCRIPTION: CSS Scroll Snap для эффекта презентации. Без скроллбаров.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;900&display=swap');
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  overflow: hidden; /* Запрещаем обычный скролл страницы */
+  font-family: 'Montserrat', sans-serif;
+  background-color: #000000;
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* Контейнер, который мы будем скроллить */
+.snap-container {
+  height: 100vh;
+  width: 100vw;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory; /* Жесткая привязка по вертикали */
+  
+  /* Прячем скроллбар, чтобы выглядело как нативное приложение */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE 10+ */
+}
+
+.snap-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+/* Сам слайд */
+.snap-slide {
+  height: 100vh;
+  width: 100vw;
+  scroll-snap-align: start; /* Магнитимся к началу слайда */
+  scroll-snap-stop: always; /* Запрещаем пролетать мимо слайдов при сильном свайпе */
+  position: relative;
+  overflow: hidden;
+}
+
+/* Анимация для стрелочки вниз на первом экране */
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-15px); }
+  60% { transform: translateY(-7px); }
+}
+
+.bounce {
+  animation: bounce 2s infinite;
+}
