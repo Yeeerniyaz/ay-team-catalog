@@ -1,13 +1,13 @@
 /**
  * PROJECT: AY TEAM Fullscreen Showroom
- * VERSION: 13.0 (Perfect Layout & Mobile Lightbox)
+ * VERSION: 14.0 (Smart Typography & Maximum Conversion)
  * ROLE: Senior Architect
- * DESCRIPTION: Идеальная типографика на ПК. Интерактивный полноэкранный просмотр чертежей на мобильном.
+ * DESCRIPTION: Убрано обрезание (...). Добавлены огромные кнопки звонка на финальный экран.
  */
 
 import React, { useState, useEffect } from 'react';
 import { 
-  MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip, Group, Modal, createTheme 
+  MantineProvider, Box, Flex, Image, Text, Title, ActionIcon, Paper, Tooltip, Group, Modal, createTheme, Button 
 } from '@mantine/core';
 import { Carousel } from '@mantine/carousel';
 import { useDisclosure, useMediaQuery } from '@mantine/hooks';
@@ -31,9 +31,9 @@ const avantGardeTheme = createTheme({
 // ⚙️ УПРАВЛЕНИЕ ПРОПОРЦИЯМИ (ТОЛЬКО ДЛЯ МОБИЛЬНОЙ ВЕРСИИ)
 // =====================================================================
 const MOBILE_LAYOUT = {
-  header: '10%',    // Высота блока с названием мебели
-  mainImage: '65%', // Высота главного большого фото
-  thumbnails: '25%' // Высота трех нижних миниатюр
+  header: '10%',    
+  mainImage: '65%', 
+  thumbnails: '25%' 
 };
 // =====================================================================
 
@@ -41,11 +41,9 @@ export default function App() {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const isMobile = useMediaQuery('(max-width: 48em)');
 
-  // Стэйт для просмотра картинок на мобилке (Lightbox)
   const [viewerOpened, { open: openViewer, close: closeViewer }] = useDisclosure(false);
   const [viewerData, setViewerData] = useState({ images: [], initialSlide: 0 });
 
-  // --- ЛОГИКА ПОЛНОЭКРАННОГО РЕЖИМА (F11) ---
   const toggleFullscreen = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(err => console.error(err));
@@ -60,11 +58,9 @@ export default function App() {
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
 
-  // --- ОТКРЫТИЕ ФОТО НА ВЕСЬ ЭКРАН (ТОЛЬКО ДЛЯ МОБИЛОК) ---
   const handleImageClick = (item, clickedIndex) => {
-    if (!isMobile) return; // На ПК ничего не делаем
+    if (!isMobile) return; 
 
-    // Собираем все доступные фото для этого товара
     const images = [item.main];
     if (item.render) images.push(item.render);
     if (item.schemes?.[0]) images.push(item.schemes[0]);
@@ -77,7 +73,7 @@ export default function App() {
   return (
     <MantineProvider theme={avantGardeTheme}>
       
-      {/* === ФИКСИРОВАННАЯ ПАНЕЛЬ КОНТАКТОВ (GLASSMORPHISM) === */}
+      {/* === ФИКСИРОВАННАЯ ПАНЕЛЬ (GLASSMORPHISM) === */}
       <Paper
         pos="fixed"
         bottom={isMobile ? 20 : 40}
@@ -86,13 +82,13 @@ export default function App() {
         zIndex={9999} 
         radius="xl"
         p="xs"
-        bg="rgba(255, 255, 255, 0.5)"
+        bg="rgba(255, 255, 255, 0.7)"
         style={{ 
           transform: isMobile ? 'translateX(-50%)' : 'none',
           backdropFilter: 'blur(20px)', 
           WebkitBackdropFilter: 'blur(20px)', 
-          border: '1px solid rgba(255,255,255,0.6)', 
-          boxShadow: '0 10px 30px rgba(0,0,0,0.15)' 
+          border: '1px solid rgba(255,255,255,0.8)', 
+          boxShadow: '0 10px 30px rgba(0,0,0,0.1)' 
         }}
       >
         <Flex direction={isMobile ? 'row' : 'column'} gap="md" align="center" px={isMobile ? "sm" : 0}>
@@ -153,21 +149,19 @@ export default function App() {
           return (
           <Box key={item.id} className="snap-slide" bg="#ffffff">
             
-            {/* ====== ПК ВЕРСИЯ (Альбомная - БЕЗ ЗУМА, БЕЗ НАЛОЖЕНИЯ ТЕКСТА) ====== */}
+            {/* ====== ПК ВЕРСИЯ (АЛЬБОМНАЯ С УМНЫМ ТЕКСТОМ) ====== */}
             <Flex h="100%" visibleFrom="md">
-              
-              {/* Идеальная панель текста слева */}
               <Flex 
-                w={140} 
+                w={160} // Чуть расширили под перенос текста
                 direction="column" 
                 align="center" 
-                justify="space-between" // Распределяет заголовок и нижний текст по краям
+                justify="space-between" 
                 py={40} 
                 style={{ borderRight: '1px solid #f0f0f0' }} 
                 pos="relative"
               >
-                {/* Контейнер заголовка, который не даст ему вылезти за рамки */}
-                <Box flex={1} w="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden', paddingBottom: '20px' }}>
+                <Box flex={1} w="100%" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {/* УМНЫЙ ТЕКСТ: Никаких (...), плавно переносится на 2-ю линию */}
                   <Title 
                     order={2} 
                     style={{ 
@@ -177,28 +171,26 @@ export default function App() {
                       textTransform: 'uppercase', 
                       color: '#000000', 
                       fontSize: '32px',
-                      whiteSpace: 'nowrap',       // Текст строго в одну линию
-                      overflow: 'hidden',         // Скрываем лишнее
-                      textOverflow: 'ellipsis',   // Добавляем троеточие, если не влезло
-                      maxHeight: '100%'           // Запрещаем вылезать из контейнера
+                      lineHeight: 1.3,
+                      whiteSpace: 'normal',   // ВАЖНО: Разрешаем перенос
+                      wordWrap: 'break-word',
+                      textAlign: 'center',
+                      maxHeight: '75vh'
                     }}
                   >
                     {item.name}
                   </Title>
                 </Box>
 
-                {/* Нижний текст всегда на своем месте */}
                 <Text size="xs" c="dimmed" fw={700} style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)', letterSpacing: '2px', flexShrink: 0 }}>
                   AY TEAM | COLLECTION 2026
                 </Text>
               </Flex>
 
-              {/* Главное фото */}
               <Box flex={1} h="100%" bg="#f8f9fa" p="xl">
                 <Image src={`/images/${item.main}`} h="100%" w="100%" fit="contain" />
               </Box>
 
-              {/* Правая колонка: Рендер + Схемы */}
               <Flex w={400} direction="column" h="100%" style={{ borderLeft: '1px solid #f0f0f0' }}>
                 <Box h="33.33%" p="xl" style={{ borderBottom: '1px solid #f0f0f0' }}>
                   {item.render && <Image src={`/images/${item.render}`} h="100%" fit="contain" />}
@@ -217,36 +209,25 @@ export default function App() {
 
             {/* ====== МОБИЛЬНАЯ ВЕРСИЯ (С КЛИКАБЕЛЬНЫМИ ФОТО) ====== */}
             <Flex h="100%" direction="column" hiddenFrom="md" bg="#ffffff" pos="relative" pb={80}>
-              
-              {/* Шапка */}
               <Flex h={MOBILE_LAYOUT.header} align="center" justify="center" style={{ borderBottom: '1px solid #f0f0f0' }}>
                 <Title order={3} tt="uppercase" size="h4" c="#000000" tracking={2} fw={900} ta="center" px="sm">
                   {item.name}
                 </Title>
               </Flex>
 
-              {/* Главное фото (Открывает слайдер с индекса 0) */}
               <Box h={MOBILE_LAYOUT.mainImage} w="100%" bg="#f8f9fa" p="sm" onClick={() => handleImageClick(item, 0)} style={{ cursor: 'zoom-in' }}>
                 <Image src={`/images/${item.main}`} h="100%" w="100%" fit="contain" />
               </Box>
 
-              {/* Миниатюры (Открывают слайдер с нужного индекса) */}
               <Flex h={MOBILE_LAYOUT.thumbnails} w="100%" p="xs" gap="xs" style={{ borderTop: '1px solid #f0f0f0' }} bg="#ffffff">
-                
-                {/* Индекс 1: Рендер */}
                 <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0', cursor: 'zoom-in' }} p={4} onClick={() => handleImageClick(item, 1)}>
                   {item.render && <Image src={`/images/${item.render}`} h="100%" w="100%" fit="contain" />}
                 </Box>
-                
-                {/* Индекс 2: Схема 1 */}
                 <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0', cursor: 'zoom-in' }} p={4} onClick={() => handleImageClick(item, 2)}>
                   {item.schemes?.[0] && <Image src={`/images/${item.schemes[0]}`} h="100%" w="100%" fit="contain" />}
                 </Box>
-                
-                {/* Индекс 3: Схема 2 */}
                 <Box flex={1} style={{ borderRadius: 8, overflow: 'hidden', border: '1px solid #f0f0f0', cursor: 'zoom-in' }} p={4} pos="relative" onClick={() => handleImageClick(item, 3)}>
                   {item.schemes?.[1] && <Image src={`/images/${item.schemes[1]}`} h="100%" w="100%" fit="contain" />}
-                  {/* Номер страницы */}
                   <Text pos="absolute" top={2} right={5} size="10px" c="dimmed" fw={900}>
                     {pageNum < 10 ? `0${pageNum}` : pageNum}
                   </Text>
@@ -257,35 +238,72 @@ export default function App() {
           </Box>
         )})}
 
-        {/* СЛАЙД: ФИНАЛЬНЫЕ КОНТАКТЫ */}
+        {/* СЛАЙД: ФИНАЛЬНЫЕ КОНТАКТЫ (МАКСИМАЛЬНАЯ КОНВЕРСИЯ) */}
         <Box className="snap-slide" bg="#000000" c="white">
-           <Flex direction="column" align="center" justify="center" h="100%" pb={80}>
-              <Title order={2} style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }} tracking={5} tt="uppercase" mb="xl" ta="center">
-                ИНДИВИДУАЛЬНЫЙ<br/>ПОДХОД
+           <Flex direction="column" align="center" justify="center" h="100%" pb={80} px="md">
+              <Title order={2} style={{ fontSize: 'clamp(2rem, 5vw, 4rem)' }} tracking={5} tt="uppercase" mb="md" ta="center">
+                ЖДЕМ ВАШЕГО<br/>ЗВОНКА
               </Title>
-              <Text c="dimmed" mb={50} tracking={2} tt="uppercase" size="sm" ta="center">Мы всегда на связи</Text>
+              <Text c="dimmed" mb={40} tracking={2} tt="uppercase" size="sm" ta="center">Оформить индивидуальный заказ</Text>
               
-              <Group gap="xl">
-                <ActionIcon variant="transparent" c="#25D366" size="xl" component="a" href="https://wa.me/77476509747" target="_blank" style={{ transform: 'scale(2)' }}>
-                  <IconBrandWhatsapp size={40} stroke={1.5} />
-                </ActionIcon>
-                <ActionIcon variant="transparent" c="#E1306C" size="xl" component="a" href="https://instagram.com/ayteam_mebel" target="_blank" style={{ transform: 'scale(2)', marginLeft: '30px' }}>
-                  <IconBrandInstagram size={40} stroke={1.5} />
-                </ActionIcon>
-              </Group>
+              {/* ОГРОМНЫЕ КНОПКИ ДЛЯ ПРОДАЖ */}
+              <Flex direction="column" gap="md" w="100%" maw={400}>
+                
+                <Button 
+                  size="xl" 
+                  radius="md" 
+                  color="white" 
+                  c="black" 
+                  fullWidth 
+                  leftSection={<IconPhone size={24} />}
+                  component="a" 
+                  href="tel:+77476509747"
+                  style={{ height: '60px', fontSize: '18px' }}
+                >
+                  Позвонить сейчас
+                </Button>
+
+                <Button 
+                  size="xl" 
+                  radius="md" 
+                  color="#25D366" 
+                  fullWidth 
+                  leftSection={<IconBrandWhatsapp size={24} />}
+                  component="a" 
+                  href="https://wa.me/77476509747"
+                  target="_blank"
+                  style={{ height: '60px', fontSize: '18px' }}
+                >
+                  Написать в WhatsApp
+                </Button>
+
+                <Button 
+                  size="xl" 
+                  radius="md" 
+                  color="dark.8" 
+                  fullWidth 
+                  leftSection={<IconBrandInstagram size={24} />}
+                  component="a" 
+                  href="https://instagram.com/ayteam_mebel"
+                  target="_blank"
+                  style={{ height: '60px', fontSize: '18px', border: '1px solid #333' }}
+                >
+                  Перейти в Instagram
+                </Button>
+
+              </Flex>
            </Flex>
         </Box>
 
       </Box>
 
-      {/* === ПОЛНОЭКРАННЫЙ ПРОСМОТРЩИК ФОТО (ТОЛЬКО ДЛЯ МОБИЛОК) === */}
-      {/* Это и есть ваша "лупа" для схем. Открывается на черном фоне. */}
+      {/* === ПОЛНОЭКРАННЫЙ ПРОСМОТРЩИК ФОТО (МОБИЛКА) === */}
       <Modal
         opened={viewerOpened}
         onClose={closeViewer}
         fullScreen
         withCloseButton
-        zIndex={100000} // Выше док-панели
+        zIndex={100000}
         overlayProps={{ backgroundOpacity: 0.95, blur: 10 }}
         styles={{
           content: { backgroundColor: 'rgba(0,0,0,0.95)' },
@@ -296,7 +314,7 @@ export default function App() {
         <Carousel
           initialSlide={viewerData.initialSlide}
           withIndicators
-          withControls={false} // На мобилке листаем пальцем
+          withControls={false} 
           loop
           height="100%"
           styles={{
